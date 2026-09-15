@@ -10,7 +10,6 @@ import { AI_CONSENT_VERSION } from '../../lib/coordinator'
 import { DEFAULT_MEANING_LANGUAGE } from '../../lib/models'
 import {
   INTERFACE_LANGUAGES,
-  INTERFACE_TO_MEANING,
   asInterfaceLanguage,
   languageName,
   localizedSettingsTitle,
@@ -36,19 +35,20 @@ const displayNames = (() => {
   }
 })()
 
-/// Fallback meaning picker when the learner picks the same language to learn
-/// and to read meanings in.
-function preferredMeaning(excludeName: string): string {
+/// Best meaning-language guess from the device/browser locale.
+function preferredMeaning(excludeName: string, fallback?: string): string {
   const navs = typeof navigator !== 'undefined' ? navigator.languages ?? [] : []
   for (const nav of navs) {
     const code = nav.split('-')[0]
     const name =
-      code === 'zh'
-        ? 'Chinese (Simplified)'
-        : (moduleFor(code)?.name ?? displayNames?.of(code) ?? '')
+      code === 'pt'
+        ? 'Brazilian Portuguese'
+        : code === 'zh'
+          ? 'Chinese (Simplified)'
+          : (moduleFor(code)?.name ?? displayNames?.of(code) ?? '')
     if (MEANING_LANGUAGES.includes(name) && name !== excludeName) return name
   }
-  return MEANING_LANGUAGES.find((n) => n !== excludeName) ?? 'English'
+  return fallback ?? MEANING_LANGUAGES.find((n) => n !== excludeName) ?? 'English'
 }
 
 function OnboardingPage() {
@@ -59,13 +59,10 @@ function OnboardingPage() {
   const [interfaceLang, setInterfaceLang] = useState<InterfaceLanguage>(
     asInterfaceLanguage(store.preferences.interfaceLanguage),
   )
-  const [meaning, setMeaning] = useState(
-    store.preferences.meaningLanguage ||
-      INTERFACE_TO_MEANING[asInterfaceLanguage(store.preferences.interfaceLanguage)],
-  )
-  const [chosenMeaning, setChosenMeaning] = useState(
-    store.preferences.meaningLanguage !== DEFAULT_MEANING_LANGUAGE ||
-      store.preferences.hasOnboarded,
+  const [meaning, setMeaning] = useState(() =>
+    store.preferences.hasOnboarded
+      ? store.preferences.meaningLanguage
+      : preferredMeaning('', DEFAULT_MEANING_LANGUAGE),
   )
   const [targetID, setTargetID] = useState(coordinator.language.id)
   const [greetingIndex, setGreetingIndex] = useState(0)
@@ -88,7 +85,6 @@ function OnboardingPage() {
   function chooseInterface(id: InterfaceLanguage) {
     setInterfaceLang(id)
     coordinator.selectInterfaceLanguage(id)
-    if (!chosenMeaning) setMeaning(INTERFACE_TO_MEANING[id])
   }
 
   function chooseTarget(id: string) {
@@ -97,10 +93,7 @@ function OnboardingPage() {
     const same =
       name === meaning ||
       (name === 'Portuguese' && meaning === 'Brazilian Portuguese')
-    if (name && same) {
-      setMeaning(preferredMeaning(name))
-      setChosenMeaning(false)
-    }
+    if (name && same) setMeaning(preferredMeaning(name))
   }
 
   function advance() {
@@ -222,10 +215,7 @@ function OnboardingPage() {
                 <Picker
                   label={t('ob.meaningPicker')}
                   value={meaning}
-                  onChange={(v) => {
-                    setMeaning(v)
-                    setChosenMeaning(true)
-                  }}
+                  onChange={setMeaning}
                   options={MEANING_LANGUAGES}
                   display={(n) => meaningLanguageName(n, interfaceLang)}
                 />

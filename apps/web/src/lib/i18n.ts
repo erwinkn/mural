@@ -155,6 +155,10 @@ const en = {
   'themes.justTalk': 'Just talk',
   'themes.search': 'Find a conversation',
   'themes.all': 'All',
+  'themes.cat.everyday': 'Everyday',
+  'themes.cat.connection': 'Connection',
+  'themes.cat.localLife': 'Local life',
+  'themes.cat.interests': 'Interests',
   'themes.none': 'No conversations match “{search}”.',
 
   // Words
@@ -374,6 +378,10 @@ const ptBR: Record<StringKey, string> = {
   'themes.justTalk': 'Só conversar',
   'themes.search': 'Encontrar uma conversa',
   'themes.all': 'Todos',
+  'themes.cat.everyday': 'Cotidiano',
+  'themes.cat.connection': 'Conexão',
+  'themes.cat.localLife': 'Vida local',
+  'themes.cat.interests': 'Interesses',
   'themes.none': 'Nenhuma conversa corresponde a “{search}”.',
 
   'words.eyebrow': 'Pouco a pouco · {language}',
@@ -588,6 +596,10 @@ const fr: Record<StringKey, string> = {
   'themes.justTalk': 'Juste parler',
   'themes.search': 'Trouver une conversation',
   'themes.all': 'Tous',
+  'themes.cat.everyday': 'Quotidien',
+  'themes.cat.connection': 'Lien',
+  'themes.cat.localLife': 'Vie locale',
+  'themes.cat.interests': 'Centres d’intérêt',
   'themes.none': 'Aucune conversation ne correspond à « {search} ».',
 
   'words.eyebrow': 'Petit à petit · {language}',
@@ -741,4 +753,59 @@ export function meaningLanguageName(name: string, ui: InterfaceLanguage): string
   } catch {
     return name
   }
+}
+
+/// Meaning language name → available translation dictionary. Theme subtitles
+/// are authored in English; pt/fr translations live in THEME_SUBTITLES and any
+/// other meaning language falls back to English.
+const MEANING_TO_DICT: Record<string, 'pt' | 'fr'> = {
+  'Brazilian Portuguese': 'pt',
+  Portuguese: 'pt',
+  French: 'fr',
+}
+
+/// English theme subtitle → localized text, keyed by the stored English string
+/// (language-module overrides reuse or add English subtitles, so translating by
+/// key would miss them).
+const THEME_SUBTITLES: Record<string, { pt?: string; fr?: string }> = {
+  'A change of scene': { pt: 'Um ar diferente', fr: 'Changer d’air' },
+  'A familiar face': { pt: 'Um rosto conhecido', fr: 'Un visage familier' },
+  'A little of everything': { pt: 'Um pouco de tudo', fr: 'Un peu de tout' },
+  'A place you remember': { pt: 'Um lugar que ficou em você', fr: 'Un lieu dont tu te souviens' },
+  'A quieter kind of day': { pt: 'Um dia mais tranquilo', fr: 'Un jour plus paisible' },
+  'A story that stayed': { pt: 'Uma história que ficou', fr: 'Une histoire qui reste' },
+  'A ticket to somewhere': { pt: 'Uma passagem para algum lugar', fr: 'Un billet pour ailleurs' },
+  'A very Norwegian chat': { pt: 'Um papo bem norueguês', fr: 'Une discussion très norvégienne' },
+  'After the working day': { pt: 'Depois do expediente', fr: 'Après le boulot' },
+  'An evening walk': { pt: 'Uma caminhada no fim de tarde', fr: 'Une balade en soirée' },
+  'An invitation, maybe': { pt: 'Um convite, talvez', fr: 'Une invitation, peut-être' },
+  'Around the office': { pt: 'Pelo escritório', fr: 'Au bureau' },
+  'Find something good': { pt: 'Encontrar algo legal', fr: 'Trouver quelque chose de bien' },
+  'Find the good tomatoes': { pt: 'Achar os tomates bons', fr: 'Trouver les bonnes tomates' },
+  'Ideas, tools and tomorrow': { pt: 'Ideias, ferramentas e o amanhã', fr: 'Des idées, des outils et demain' },
+  'Let the conversation linger': { pt: 'Deixar a conversa rolar', fr: 'Laisser la conversation durer' },
+  'Let’s make something': { pt: 'Vamos fazer alguma coisa', fr: 'On cuisine quelque chose' },
+  'Made with a little care': { pt: 'Feito com carinho', fr: 'Fait avec soin' },
+  'Make yourself at home': { pt: 'Sinta-se em casa', fr: 'Mets-toi à l’aise' },
+  'Out into the fresh air': { pt: 'Para respirar ar puro', fr: 'Prendre l’air' },
+  'Plans worth talking about': { pt: 'Planos que valem uma conversa', fr: 'Des plans qui méritent d’en parler' },
+  'Room for another view': { pt: 'Espaço para outro ponto de vista', fr: 'De la place pour un autre avis' },
+  'Small customs, big stories': { pt: 'Pequenos costumes, grandes histórias', fr: 'Petites coutumes, grandes histoires' },
+  'Something to talk about': { pt: 'Assunto para conversar', fr: 'De quoi discuter' },
+  'Something warm, please': { pt: 'Algo quentinho, por favor', fr: 'Quelque chose de chaud' },
+  'Something worth watching': { pt: 'Algo que vale assistir', fr: 'Quelque chose à regarder' },
+  'Somewhere in the sunshine': { pt: 'Um lugar ensolarado', fr: 'Quelque part au soleil' },
+  'Start somewhere small': { pt: 'Começar por algo simples', fr: 'Commencer petit' },
+  'Stay a little longer': { pt: 'Fique mais um pouco', fr: 'Rester encore un peu' },
+  'Stay for dessert': { pt: 'Fique para a sobremesa', fr: 'Rester pour le dessert' },
+  'Tell me about yours': { pt: 'Me conta do seu', fr: 'Raconte-moi le tien' },
+  'What are you listening to?': { pt: 'O que você está ouvindo?', fr: 'Tu écoutes quoi ?' },
+  'Whatever the weather': { pt: 'Chova ou faça sol', fr: 'Quel que soit le temps' },
+}
+
+/// Theme subtitle in the learner's meaning language (English fallback).
+export function themeSubtitle(subtitle: string, meaningLanguage: string): string {
+  const lang = MEANING_TO_DICT[meaningLanguage]
+  if (!lang) return subtitle
+  return THEME_SUBTITLES[subtitle]?.[lang] ?? subtitle
 }

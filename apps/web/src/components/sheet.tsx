@@ -2,7 +2,11 @@ import { Dialog } from '@base-ui/react/dialog'
 import { Select } from '@base-ui/react/select'
 import { Switch } from '@base-ui/react/switch'
 import { Check, ChevronDown, X } from 'lucide-react'
-import type { ReactNode } from 'react'
+import { createContext, useContext, useState, type ReactNode } from 'react'
+
+/// While a Sheet is open, Base UI locks pointer events on everything outside
+/// the dialog — so portaled popups (Select, etc.) must render inside it.
+const SheetPortalContext = createContext<HTMLElement | null>(null)
 
 /// Bottom sheet on phones, centered card on larger screens — mirrors the iOS
 /// .sheet presentation with grabber, big rounded corners and cream surface.
@@ -19,24 +23,27 @@ export function Sheet({
   children: ReactNode
   wide?: boolean
 }) {
+  const [popupEl, setPopupEl] = useState<HTMLElement | null>(null)
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Backdrop className="sheet-backdrop" />
-        <Dialog.Popup className="sheet" style={wide ? { width: 'min(760px, calc(100vw - 32px))' } : undefined}>
-          <span className="grabber" aria-hidden />
-          {title ? (
-            <div className="flex items-center justify-between px-6 pt-2 pb-1">
-              <Dialog.Title className="text-[0.95rem] font-medium text-ink">{title}</Dialog.Title>
-              <Dialog.Close
-                className="glass flex size-10 items-center justify-center rounded-full text-ink"
-                aria-label="Done"
-              >
-                <X size={18} />
-              </Dialog.Close>
-            </div>
-          ) : null}
-          <div className="sheet-scroll">{children}</div>
+        <Dialog.Popup ref={setPopupEl} className="sheet" style={wide ? { width: 'min(760px, calc(100vw - 32px))' } : undefined}>
+          <SheetPortalContext.Provider value={popupEl}>
+            <span className="grabber" aria-hidden />
+            {title ? (
+              <div className="flex items-center justify-between px-6 pt-2 pb-1">
+                <Dialog.Title className="text-[0.95rem] font-medium text-ink">{title}</Dialog.Title>
+                <Dialog.Close
+                  className="glass flex size-10 items-center justify-center rounded-full text-ink"
+                  aria-label="Done"
+                >
+                  <X size={18} />
+                </Dialog.Close>
+              </div>
+            ) : null}
+            <div className="sheet-scroll">{children}</div>
+          </SheetPortalContext.Provider>
         </Dialog.Popup>
       </Dialog.Portal>
     </Dialog.Root>
@@ -59,6 +66,7 @@ export function Picker<T extends string | number>({
   display?: (v: T) => string
 }) {
   const show = display ?? ((v: T) => String(v))
+  const portalContainer = useContext(SheetPortalContext)
   return (
     <Select.Root value={value} onValueChange={(v) => onChange(v as T)} disabled={disabled}>
       <Select.Trigger
@@ -73,7 +81,7 @@ export function Picker<T extends string | number>({
           <ChevronDown size={18} className="text-cocoa" />
         </Select.Icon>
       </Select.Trigger>
-      <Select.Portal>
+      <Select.Portal container={portalContainer ?? undefined}>
         <Select.Positioner sideOffset={6} className="z-[60]">
           <Select.Popup className="max-h-72 min-w-[var(--anchor-width)] overflow-y-auto rounded-2xl bg-white p-1.5 shadow-xl shadow-ink/10">
             {options.map((o) => (

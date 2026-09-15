@@ -4,7 +4,8 @@ import { useState } from 'react'
 import { PageHeading } from '../../components/brand'
 import { ThemeIcon } from '../../components/icons'
 import { CurrentTopicSheet } from '../../components/sheets'
-import { useCoordinator, useT } from '../../lib/app'
+import { useCoordinator, useStore, useT } from '../../lib/app'
+import { themeSubtitle } from '../../lib/i18n'
 import { moduleThemes } from '../../lib/languages'
 import type { ConversationTheme } from '../../lib/themes'
 
@@ -16,11 +17,20 @@ export const Route = createFileRoute('/_app/themes')({
 
 function ThemesPage() {
   const coordinator = useCoordinator()
+  const store = useStore()
   const t = useT()
   const navigate = useNavigate()
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('All')
   const [current, setCurrent] = useState(false)
+
+  const meaningLanguage = store.preferences.meaningLanguage
+  const categoryLabels: Record<string, string> = {
+    Everyday: t('themes.cat.everyday'),
+    Connection: t('themes.cat.connection'),
+    'Local life': t('themes.cat.localLife'),
+    Interests: t('themes.cat.interests'),
+  }
 
   const all = moduleThemes(coordinator.language)
   const categories = ['All', ...new Set(all.map((t) => t.category))]
@@ -76,7 +86,7 @@ function ThemesPage() {
             }`}
             onClick={() => setCategory(c)}
           >
-            {c === 'All' ? t('themes.all') : c}
+            {c === 'All' ? t('themes.all') : (categoryLabels[c] ?? c)}
           </button>
         ))}
       </div>
@@ -92,7 +102,7 @@ function ThemesPage() {
             <ThemeIcon symbol={t.symbol} />
             <span className="flex flex-col items-start gap-1">
               <span className="font-semibold">{t.title}</span>
-              <span className="text-[0.8rem] text-cocoa">{t.subtitle}</span>
+              <span className="text-[0.8rem] text-cocoa">{themeSubtitle(t.subtitle, meaningLanguage)}</span>
             </span>
           </button>
         ))}
