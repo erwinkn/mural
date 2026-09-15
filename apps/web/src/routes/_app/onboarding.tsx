@@ -4,52 +4,21 @@ import { useEffect, useMemo, useState } from 'react'
 import { Brand } from '../../components/brand'
 import { MuralOrb } from '../../components/orb'
 import { PinyinHelp } from '../../components/pinyin'
-import { Picker } from '../../components/sheet'
 import { useApp, useT } from '../../lib/app'
 import { AI_CONSENT_VERSION } from '../../lib/coordinator'
-import { DEFAULT_MEANING_LANGUAGE } from '../../lib/models'
 import {
   INTERFACE_LANGUAGES,
+  INTERFACE_TO_MEANING,
   asInterfaceLanguage,
   languageName,
   localizedSettingsTitle,
-  meaningLanguageName,
   type InterfaceLanguage,
 } from '../../lib/i18n'
-import {
-  ALL_LANGUAGES,
-  MEANING_LANGUAGES,
-  meaningGreeting,
-  moduleFor,
-} from '../../lib/languages'
+import { ALL_LANGUAGES, meaningGreeting, moduleFor } from '../../lib/languages'
 
 export const Route = createFileRoute('/_app/onboarding')({
   component: OnboardingPage,
 })
-
-const displayNames = (() => {
-  try {
-    return new Intl.DisplayNames(['en'], { type: 'language' })
-  } catch {
-    return null
-  }
-})()
-
-/// Best meaning-language guess from the device/browser locale.
-function preferredMeaning(excludeName: string, fallback?: string): string {
-  const navs = typeof navigator !== 'undefined' ? navigator.languages ?? [] : []
-  for (const nav of navs) {
-    const code = nav.split('-')[0]
-    const name =
-      code === 'pt'
-        ? 'Brazilian Portuguese'
-        : code === 'zh'
-          ? 'Chinese (Simplified)'
-          : (moduleFor(code)?.name ?? displayNames?.of(code) ?? '')
-    if (MEANING_LANGUAGES.includes(name) && name !== excludeName) return name
-  }
-  return fallback ?? MEANING_LANGUAGES.find((n) => n !== excludeName) ?? 'English'
-}
 
 function OnboardingPage() {
   const { store, coordinator } = useApp()
@@ -58,11 +27,6 @@ function OnboardingPage() {
   const [step, setStep] = useState(0)
   const [interfaceLang, setInterfaceLang] = useState<InterfaceLanguage>(
     asInterfaceLanguage(store.preferences.interfaceLanguage),
-  )
-  const [meaning, setMeaning] = useState(() =>
-    store.preferences.hasOnboarded
-      ? store.preferences.meaningLanguage
-      : preferredMeaning('', DEFAULT_MEANING_LANGUAGE),
   )
   const [targetID, setTargetID] = useState(coordinator.language.id)
   const [greetingIndex, setGreetingIndex] = useState(0)
@@ -87,21 +51,11 @@ function OnboardingPage() {
     coordinator.selectInterfaceLanguage(id)
   }
 
-  function chooseTarget(id: string) {
-    setTargetID(id)
-    const name = moduleFor(id)?.name
-    const same =
-      name === meaning ||
-      (name === 'Portuguese' && meaning === 'Brazilian Portuguese')
-    if (name && same) setMeaning(preferredMeaning(name))
-  }
-
   function advance() {
-    if (step < 2) {
+    if (step < 1) {
       setStep(step + 1)
     } else {
       coordinator.selectLanguage(targetID)
-      coordinator.selectMeaningLanguage(meaning)
       coordinator.selectInterfaceLanguage(interfaceLang)
       store.updatePreferences((p) => {
         p.meaningVisible = true
@@ -134,7 +88,7 @@ function OnboardingPage() {
           {step > 0 ? (
             <button
               type="button"
-              aria-label={step === 1 ? t('ob.backInterface') : t('ob.backMeaning')}
+              aria-label={t('ob.backInterface')}
               className="glass flex size-11 items-center justify-center rounded-full"
               onClick={() => setStep(step - 1)}
             >
@@ -145,9 +99,9 @@ function OnboardingPage() {
           )}
           <div
             className="flex items-center gap-1.5"
-            aria-label={t('ob.step', { n: step + 1, total: 3 })}
+            aria-label={t('ob.step', { n: step + 1, total: 2 })}
           >
-            {[0, 1, 2].map((i) => (
+            {[0, 1].map((i) => (
               <span
                 key={i}
                 className={`h-1.5 rounded-full transition-all ${
@@ -159,16 +113,16 @@ function OnboardingPage() {
         </div>
 
         <div className="flex-1 overflow-y-auto px-6 pb-6">
-          <div className={`flex flex-col items-center ${step === 2 ? 'gap-4' : 'gap-5'}`}>
+          <div className={`flex flex-col items-center ${step === 1 ? 'gap-4' : 'gap-5'}`}>
             <div className="flex flex-col items-center gap-1 pt-2">
-              <MuralOrb className={step === 2 ? 'w-20' : 'w-32'} />
+              <MuralOrb className={step === 1 ? 'w-20' : 'w-32'} />
               <p
                 key={greeting}
                 className={`fade-in font-medium tracking-[-2px] ${
-                  step === 2 ? 'text-5xl' : 'text-6xl'
+                  step === 1 ? 'text-5xl' : 'text-6xl'
                 }`}
               >
-                {step === 2 ? target.greeting : greeting}
+                {step === 1 ? target.greeting : greeting}
               </p>
             </div>
 
@@ -204,23 +158,6 @@ function OnboardingPage() {
                 </div>
                 <p className="text-center text-[0.8rem] text-cocoa">{t('ob.interfaceHint')}</p>
               </div>
-            ) : step === 1 ? (
-              <div className="flex w-full flex-col items-center gap-5">
-                <div className="flex flex-col items-center gap-2.5 text-center">
-                  <h1 className="text-2xl font-semibold tracking-[-0.5px] whitespace-pre-line">
-                    {t('ob.meaningTitle')}
-                  </h1>
-                  <p className="text-[0.95rem] text-cocoa">{t('ob.meaningSub')}</p>
-                </div>
-                <Picker
-                  label={t('ob.meaningPicker')}
-                  value={meaning}
-                  onChange={setMeaning}
-                  options={MEANING_LANGUAGES}
-                  display={(n) => meaningLanguageName(n, interfaceLang)}
-                />
-                <p className="pt-2 text-center text-[0.8rem] text-cocoa">{t('ob.meaningHint')}</p>
-              </div>
             ) : (
               <div className="flex w-full flex-col gap-4">
                 <h1 className="text-center text-2xl font-semibold tracking-[-0.5px] whitespace-pre-line">
@@ -237,7 +174,7 @@ function OnboardingPage() {
                           ? 'bg-white/95 ring-[1.5px] ring-orange/55'
                           : 'bg-white/50'
                       }`}
-                      onClick={() => chooseTarget(l.id)}
+                      onClick={() => setTargetID(l.id)}
                     >
                       <span className="flex flex-1 flex-col items-start gap-0.5">
                         <span className="font-semibold">{l.nativeName}</span>
@@ -258,7 +195,7 @@ function OnboardingPage() {
                     {t('ob.speaks', { language: languageName(target, interfaceLang) })}
                   </p>
                   {target.id === 'zh' ? <PinyinHelp text={target.greeting} /> : null}
-                  <p className="text-cocoa">{meaningGreeting(meaning)}</p>
+                  <p className="text-cocoa">{meaningGreeting(INTERFACE_TO_MEANING[interfaceLang])}</p>
                 </div>
               </div>
             )}
@@ -266,12 +203,12 @@ function OnboardingPage() {
         </div>
 
         <div className="flex flex-col gap-3 px-6 pt-4 pb-5">
-          {step === 2 ? consent : null}
+          {step === 1 ? consent : null}
           <button type="button" className="btn-primary text-lg" onClick={advance}>
-            {step === 2 ? t('ob.agree') : t('ob.continue')}
+            {step === 1 ? t('ob.agree') : t('ob.continue')}
           </button>
           <p className="text-center text-[0.8rem] text-cocoa">
-            {step === 2 ? t('ob.footnoteLast') : t('ob.footnote0')}
+            {step === 1 ? t('ob.footnoteLast') : t('ob.footnote0')}
           </p>
         </div>
       </div>

@@ -4,7 +4,7 @@
 import { api, AuthError } from './api'
 import { defaultPreferencesWith } from './archive'
 import { moduleFor, defaultTitle, DEFAULT_LANGUAGE_ID } from './languages'
-import { interfaceLanguageOf, translate } from './i18n'
+import { INTERFACE_TO_MEANING, interfaceLanguageOf, translate } from './i18n'
 import { projectLearner, type LearnerState } from './learning'
 import {
   correctFragment,
@@ -103,6 +103,9 @@ export class LearningStore {
         s.endReason = 'App closed before finalization'
       }
     }
+    // Meanings always follow the interface language.
+    archive.preferences.meaningLanguage =
+      INTERFACE_TO_MEANING[interfaceLanguageOf(archive.preferences)]
     this.archive = archive
     this.hydrated = true
     this.emit()

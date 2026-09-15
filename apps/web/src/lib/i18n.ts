@@ -51,10 +51,6 @@ const en = {
   'ob.step': 'Step {n} of {total}',
   'ob.interfaceTitle': 'Choose your language.',
   'ob.interfaceHint': 'You can change this later in Settings.',
-  'ob.meaningTitle': 'A little help,\nin your language.',
-  'ob.meaningSub': 'Choose the language you read most easily for meanings.',
-  'ob.meaningPicker': 'Subtitle language',
-  'ob.meaningHint': 'Turn meanings on whenever you need a hand.',
   'ob.targetTitle': 'What would you\nlike to speak?',
   'ob.speaks': 'Mural speaks {language}.',
   'ob.continue': 'Continue',
@@ -62,7 +58,6 @@ const en = {
   'ob.footnote0': 'We’ll find your pace through conversation.',
   'ob.footnoteLast': 'You can change all of this in Settings.',
   'ob.backInterface': 'Back to interface language',
-  'ob.backMeaning': 'Back to subtitle language',
 
   // Consent
   'consent.summary':
@@ -209,7 +204,6 @@ const en = {
   'settings.learningLanguage': 'Learning language',
   'settings.interfaceLanguage': 'Interface language',
   'settings.meaningSubtitles': 'Meaning subtitles',
-  'settings.meaningLanguage': 'Meaning language',
   'settings.corrections': 'Corrections',
   'settings.correctionsValue': 'Gently, as we talk',
   'settings.interests': 'A few things you enjoy',
@@ -281,10 +275,6 @@ const ptBR: Record<StringKey, string> = {
   'ob.step': 'Etapa {n} de {total}',
   'ob.interfaceTitle': 'Escolha seu idioma.',
   'ob.interfaceHint': 'Você pode mudar isso depois nos Ajustes.',
-  'ob.meaningTitle': 'Uma ajudinha,\nno seu idioma.',
-  'ob.meaningSub': 'Escolha o idioma em que você lê com mais facilidade para ver significados.',
-  'ob.meaningPicker': 'Idioma das legendas',
-  'ob.meaningHint': 'Ative os significados sempre que precisar de uma mão.',
   'ob.targetTitle': 'O que você gostaria\nde falar?',
   'ob.speaks': 'O Mural fala {language}.',
   'ob.continue': 'Continuar',
@@ -292,7 +282,6 @@ const ptBR: Record<StringKey, string> = {
   'ob.footnote0': 'Vamos encontrar seu ritmo pela conversa.',
   'ob.footnoteLast': 'Você pode mudar tudo isso nos Ajustes.',
   'ob.backInterface': 'Voltar ao idioma da interface',
-  'ob.backMeaning': 'Voltar ao idioma das legendas',
 
   'consent.summary':
     'Com sua permissão, o Mural envia áudio e texto selecionado para a OpenAI para oferecer conversas e significados. Aplicam-se as regras de retenção do provedor.',
@@ -429,7 +418,6 @@ const ptBR: Record<StringKey, string> = {
   'settings.learningLanguage': 'Idioma de aprendizado',
   'settings.interfaceLanguage': 'Idioma da interface',
   'settings.meaningSubtitles': 'Legendas de significado',
-  'settings.meaningLanguage': 'Idioma dos significados',
   'settings.corrections': 'Correções',
   'settings.correctionsValue': 'Com leveza, durante a conversa',
   'settings.interests': 'Algumas coisas que você gosta',
@@ -498,10 +486,6 @@ const fr: Record<StringKey, string> = {
   'ob.step': 'Étape {n} sur {total}',
   'ob.interfaceTitle': 'Choisis ta langue.',
   'ob.interfaceHint': 'Tu pourras changer ça plus tard dans les Réglages.',
-  'ob.meaningTitle': 'Un petit coup de pouce,\ndans ta langue.',
-  'ob.meaningSub': 'Choisis la langue que tu lis le plus facilement pour les significations.',
-  'ob.meaningPicker': 'Langue des sous-titres',
-  'ob.meaningHint': 'Active les significations quand tu as besoin d’un coup de main.',
   'ob.targetTitle': 'Qu’est-ce que tu veux\nparler ?',
   'ob.speaks': 'Mural parle {language}.',
   'ob.continue': 'Continuer',
@@ -509,7 +493,6 @@ const fr: Record<StringKey, string> = {
   'ob.footnote0': 'On trouvera ton rythme par la conversation.',
   'ob.footnoteLast': 'Tu peux changer tout ça dans les Réglages.',
   'ob.backInterface': 'Retour à la langue de l’interface',
-  'ob.backMeaning': 'Retour à la langue des sous-titres',
 
   'consent.summary':
     'Avec ta permission, Mural envoie l’audio et le texte sélectionné à OpenAI pour proposer des conversations et des significations. Les règles de conservation du fournisseur s’appliquent.',
@@ -647,7 +630,6 @@ const fr: Record<StringKey, string> = {
   'settings.learningLanguage': 'Langue d’apprentissage',
   'settings.interfaceLanguage': 'Langue de l’interface',
   'settings.meaningSubtitles': 'Sous-titres de sens',
-  'settings.meaningLanguage': 'Langue des significations',
   'settings.corrections': 'Corrections',
   'settings.correctionsValue': 'En douceur, pendant la conversation',
   'settings.interests': 'Quelques choses que tu aimes',
@@ -725,34 +707,6 @@ export function languageName(m: LanguageModule, ui: InterfaceLanguage): string {
 /// "Norwegian · Bokmål" style picker label, localized to the interface.
 export function localizedSettingsTitle(m: LanguageModule, ui: InterfaceLanguage): string {
   return `${languageName(m, ui)} · ${m.variety}`
-}
-
-/// BCP-47 locale for each entry in MEANING_LANGUAGES (display only — the
-/// canonical English name is what gets stored in preferences).
-const MEANING_LANGUAGE_LOCALES: Record<string, string> = {
-  English: 'en',
-  French: 'fr',
-  German: 'de',
-  Spanish: 'es',
-  Norwegian: 'nb',
-  Portuguese: 'pt',
-  'Brazilian Portuguese': 'pt-BR',
-  Italian: 'it',
-  'Chinese (Simplified)': 'zh-Hans',
-  Polish: 'pl',
-  Arabic: 'ar',
-  Ukrainian: 'uk',
-}
-
-/// Display name for a meaning language in the interface language.
-export function meaningLanguageName(name: string, ui: InterfaceLanguage): string {
-  const locale = MEANING_LANGUAGE_LOCALES[name]
-  if (!locale) return name
-  try {
-    return new Intl.DisplayNames([ui], { type: 'language' }).of(locale) ?? name
-  } catch {
-    return name
-  }
 }
 
 /// Meaning language name → available translation dictionary. Theme subtitles

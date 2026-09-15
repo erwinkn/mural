@@ -23,7 +23,12 @@ import {
 import { makeSession } from './models'
 import { LiveTransport, type ConnectionState } from './realtime'
 import type { LearningStore } from './store'
-import { INTERFACE_LANGUAGES, type StringKey } from './i18n'
+import {
+  INTERFACE_LANGUAGES,
+  INTERFACE_TO_MEANING,
+  type InterfaceLanguage,
+  type StringKey,
+} from './i18n'
 import type { ConversationTheme } from './themes'
 import * as TeachingPolicy from './teaching'
 
@@ -548,20 +553,15 @@ export class ConversationCoordinator {
     this.emit()
   }
 
-  selectMeaningLanguage(value: string): void {
-    this.meanings.reset()
-    this.store.updatePreferences((p) => {
-      p.meaningLanguage = value
-    })
-    this.scheduleTranslation()
-    this.emit()
-  }
-
+  /// Interface language doubles as the meaning language — one choice.
   selectInterfaceLanguage(id: string): void {
     if (!INTERFACE_LANGUAGES.some((l) => l.id === id)) return
+    this.meanings.reset()
     this.store.updatePreferences((p) => {
       p.interfaceLanguage = id
+      p.meaningLanguage = INTERFACE_TO_MEANING[id as InterfaceLanguage]
     })
+    this.scheduleTranslation()
     this.emit()
   }
 

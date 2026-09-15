@@ -3,8 +3,8 @@ import { useRef, useState } from 'react'
 import { useCoordinator, useStore, useT } from '../lib/app'
 import { api } from '../lib/api'
 import { decodeArchiveText, encodeArchiveText } from '../lib/archive'
-import { ALL_LANGUAGES, MEANING_LANGUAGES } from '../lib/languages'
-import { INTERFACE_LANGUAGES, asInterfaceLanguage, localizedSettingsTitle, meaningLanguageName } from '../lib/i18n'
+import { ALL_LANGUAGES } from '../lib/languages'
+import { INTERFACE_LANGUAGES, asInterfaceLanguage, localizedSettingsTitle } from '../lib/i18n'
 import { useNavigate } from '@tanstack/react-router'
 import { Sheet, SettingRow, SettingSection, Toggle, Picker } from './sheet'
 
@@ -87,13 +87,6 @@ export function SettingsSheet() {
             label={t('settings.meaningSubtitles')}
             checked={store.preferences.meaningVisible}
             onChange={() => coordinator.toggleMeaning()}
-          />
-          <Picker
-            label={t('settings.meaningLanguage')}
-            value={store.preferences.meaningLanguage}
-            onChange={(v) => coordinator.selectMeaningLanguage(v)}
-            options={MEANING_LANGUAGES}
-            display={(n) => meaningLanguageName(n, asInterfaceLanguage(store.preferences.interfaceLanguage))}
           />
           <SettingRow label={t('settings.corrections')} value={t('settings.correctionsValue')} />
           <textarea
