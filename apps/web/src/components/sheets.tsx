@@ -1,10 +1,10 @@
 import { ArrowUp, AudioWaveform, Loader2, Search, Sparkles } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { useCoordinator, useStore } from '../lib/app'
-import { AI_CONSENT_SUMMARY } from '../lib/coordinator'
+import { useCoordinator, useInterfaceLanguage, useStore, useT } from '../lib/app'
+import { languageName } from '../lib/i18n'
 import type { TopicBrief } from '../lib/models'
 import type { WordState } from '../lib/learning'
-import { wordExplanation, wordLabel } from '../lib/learning'
+import { wordExplanationKey, wordLabelKey } from '../lib/learning'
 import { PinyinHelp } from './pinyin'
 import { RecallBars } from './brand'
 import { Sheet } from './sheet'
@@ -16,18 +16,20 @@ const dateFmt = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' })
 
 export function TypedReplySheet({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
   const coordinator = useCoordinator()
+  const t = useT()
+  const ui = useInterfaceLanguage()
   const [text, setText] = useState('')
   const [sending, setSending] = useState(false)
   useEffect(() => {
     if (open) setText('')
   }, [open])
   return (
-    <Sheet open={open} onOpenChange={onOpenChange} title="Say it your way.">
+    <Sheet open={open} onOpenChange={onOpenChange} title={t('typed.title')}>
       <div className="flex flex-col gap-5 px-6 pt-2 pb-8">
         <textarea
           autoFocus
           className="field min-h-32"
-          placeholder={`Reply in ${coordinator.language.name} or another language`}
+          placeholder={t('typed.placeholder', { language: languageName(coordinator.language, ui) })}
           value={text}
           onChange={(e) => setText(e.target.value)}
         />
@@ -45,7 +47,7 @@ export function TypedReplySheet({ open, onOpenChange }: { open: boolean; onOpenC
             }
           }}
         >
-          {sending ? 'Sending…' : 'Send reply'}
+          {sending ? t('typed.sending') : t('typed.send')}
           <ArrowUp size={18} />
         </button>
       </div>
@@ -68,6 +70,7 @@ export function LookupSheet({
   onClose: () => void
 }) {
   const coordinator = useCoordinator()
+  const t = useT()
   const [explanation, setExplanation] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -87,7 +90,7 @@ export function LookupSheet({
   }, [item?.word, item?.sentence])
 
   return (
-    <Sheet open={item != null} onOpenChange={(v) => !v && onClose()} title="A little meaning">
+    <Sheet open={item != null} onOpenChange={(v) => !v && onClose()} title={t('lookup.title')}>
       {item ? (
         <div className="flex flex-col items-start gap-5 px-6 pt-2 pb-10">
           <h2 className="text-4xl font-medium">{item.word}</h2>
@@ -99,7 +102,7 @@ export function LookupSheet({
             <p className="text-cocoa">{error}</p>
           ) : (
             <p className="flex items-center gap-2 text-cocoa">
-              <Loader2 size={16} className="spin" /> Finding the meaning…
+              <Loader2 size={16} className="spin" /> {t('lookup.finding')}
             </p>
           )}
         </div>
@@ -112,8 +115,9 @@ export function LookupSheet({
 
 export function WordDetailSheet({ word, onClose }: { word: WordState | null; onClose: () => void }) {
   const store = useStore()
+  const t = useT()
   return (
-    <Sheet open={word != null} onOpenChange={(v) => !v && onClose()} title="Word">
+    <Sheet open={word != null} onOpenChange={(v) => !v && onClose()} title={t('word.title')}>
       {word ? (
         <div className="flex flex-col items-start gap-6 px-6 pt-2 pb-10">
           <h2 className="text-4xl font-medium">{word.lemma}</h2>
@@ -121,14 +125,14 @@ export function WordDetailSheet({ word, onClose }: { word: WordState | null; onC
           <p className="text-xl text-cocoa">{word.meaning}</p>
           <div className="flex items-center gap-3">
             <RecallBars count={word.bars} />
-            <span>{wordLabel(word)}</span>
+            <span>{t(wordLabelKey(word))}</span>
           </div>
-          <p>{wordExplanation(word)}</p>
+          <p>{t(wordExplanationKey(word))}</p>
           <blockquote className="card w-full !bg-peach p-5 text-xl font-medium">
             “{word.example}”
           </blockquote>
           <p className="text-[0.8rem] text-cocoa">
-            {word.independentCount} independent uses · Last seen {dateFmt.format(word.lastSeen)}
+            {t('word.uses', { count: word.independentCount, date: dateFmt.format(word.lastSeen) })}
           </p>
           <button
             type="button"
@@ -138,7 +142,7 @@ export function WordDetailSheet({ word, onClose }: { word: WordState | null; onC
               onClose()
             }}
           >
-            Remove from my words
+            {t('word.remove')}
           </button>
         </div>
       ) : null}
@@ -150,6 +154,7 @@ export function WordDetailSheet({ word, onClose }: { word: WordState | null; onC
 
 export function ConsentSheet() {
   const coordinator = useCoordinator()
+  const t = useT()
   return (
     <Sheet
       open={coordinator.showAIConsent}
@@ -159,11 +164,10 @@ export function ConsentSheet() {
     >
       <div className="flex flex-col items-start gap-5 px-7 pt-4 pb-10">
         <AudioWaveform size={32} strokeWidth={1.5} className="text-orange" aria-hidden />
-        <h2 className="text-3xl font-semibold">Before we talk.</h2>
-        <p>{AI_CONSENT_SUMMARY}</p>
+        <h2 className="text-3xl font-semibold">{t('consent.title')}</h2>
+        <p>{t('consent.summary')}</p>
         <p className="text-[0.95rem] text-cocoa">
-          Your learning record stays with this Mural. Mural does not save raw audio. You can keep
-          browsing your saved words and conversations without agreeing.
+          {t('consent.body')}
         </p>
         <a
           className="text-[0.95rem] underline"
@@ -171,21 +175,21 @@ export function ConsentSheet() {
           target="_blank"
           rel="noreferrer"
         >
-          Privacy policy
+          {t('consent.privacy')}
         </a>
         <button
           type="button"
           className="btn-primary"
           onClick={() => coordinator.acceptAIConsent()}
         >
-          Agree and continue
+          {t('consent.agree')}
         </button>
         <button
           type="button"
           className="w-full text-center text-[0.95rem]"
           onClick={() => coordinator.declineAIConsent()}
         >
-          Not now
+          {t('consent.notNow')}
         </button>
       </div>
     </Sheet>
@@ -204,6 +208,7 @@ export function CurrentTopicSheet({
   onSelected: () => void
 }) {
   const coordinator = useCoordinator()
+  const t = useT()
   const [query, setQuery] = useState('')
   const [brief, setBrief] = useState<TopicBrief | null>(null)
   const [loading, setLoading] = useState(false)
@@ -230,10 +235,10 @@ export function CurrentTopicSheet({
   }
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange} title="The world today" wide>
+    <Sheet open={open} onOpenChange={onOpenChange} title={t('topic.title')} wide>
       <div className="flex flex-col items-start gap-5 px-6 pt-2 pb-10">
-        <h2 className="text-3xl font-semibold">A fresh conversation.</h2>
-        <p className="text-cocoa">What would you like to talk about?</p>
+        <h2 className="text-3xl font-semibold">{t('topic.heading')}</h2>
+        <p className="text-cocoa">{t('topic.sub')}</p>
         <textarea
           className="field min-h-20"
           placeholder={coordinator.language.topicPlaceholder}
@@ -246,7 +251,7 @@ export function CurrentTopicSheet({
           disabled={loading || !query.trim()}
           onClick={() => void find()}
         >
-          {loading ? 'Finding something interesting…' : 'Find a topic'}
+          {loading ? t('topic.finding') : t('topic.find')}
           {loading ? <Loader2 size={18} className="spin" /> : <Search size={18} />}
         </button>
         {error ? <p className="text-[0.85rem] text-cocoa">{error}</p> : null}
@@ -263,13 +268,13 @@ export function CurrentTopicSheet({
                 onOpenChange(false)
               }}
             >
-              Talk about this
+              {t('topic.talk')}
               <Sparkles size={18} />
             </button>
           </>
         ) : null}
         <p className="text-[0.8rem] text-cocoa">
-          Search uses your hosted OpenAI account. Sources stay attached to the topic.
+          {t('topic.footnote')}
         </p>
       </div>
     </Sheet>

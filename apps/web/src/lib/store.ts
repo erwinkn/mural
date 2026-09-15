@@ -4,6 +4,7 @@
 import { api, AuthError } from './api'
 import { defaultPreferencesWith } from './archive'
 import { moduleFor, defaultTitle, DEFAULT_LANGUAGE_ID } from './languages'
+import { interfaceLanguageOf, translate } from './i18n'
 import { projectLearner, type LearnerState } from './learning'
 import {
   correctFragment,
@@ -55,9 +56,43 @@ export class LearningStore {
         this.onAuthFailure?.()
         return
       }
-      this.error = 'Mural couldn’t save your progress. Please export a backup and try again.'
+      this.error = translate(interfaceLanguageOf(this.preferences), 'error.saveProgress')
       this.emit()
     })
+  }
+
+  /// Writes are serialized per resource — parallel PUTs race on the server and
+  /// an older snapshot can land last. Each queued task snapshots state at send
+  /// time so the final write always carries the newest data.
+  private prefQueue: Promise<void> = Promise.resolve()
+  private sessionQueues = new Map<string, Promise<void>>()
+
+  private enqueue(
+    queue: Promise<void>,
+    set: (next: Promise<void>) => void,
+    task: () => Promise<unknown>,
+  ): void {
+    const next = queue.then(async () => {
+      await task()
+    })
+    set(next.catch(() => {}))
+    this.report(next)
+  }
+
+  private persistPreferences(): void {
+    this.enqueue(
+      this.prefQueue,
+      (q) => (this.prefQueue = q),
+      () => api.savePreferences({ ...this.archive.preferences }),
+    )
+  }
+
+  private persistSession(id: string, task: () => Promise<unknown>): void {
+    this.enqueue(
+      this.sessionQueues.get(id) ?? Promise.resolve(),
+      (q) => this.sessionQueues.set(id, q),
+      task,
+    )
   }
 
   hydrate(archive: Archive): void {
@@ -97,13 +132,13 @@ export class LearningStore {
     if (!moduleFor(id)) return
     this.archive.preferences.learningLanguageID = id
     this.emit()
-    this.report(api.savePreferences(this.archive.preferences))
+    this.persistPreferences()
   }
 
   updatePreferences(change: (p: Preferences) => void): void {
     change(this.archive.preferences)
     this.emit()
-    this.report(api.savePreferences(this.archive.preferences))
+    this.persistPreferences()
   }
 
   save(session: SessionRecord): void {
@@ -111,20 +146,23 @@ export class LearningStore {
     if (i >= 0) this.archive.sessions[i] = session
     else this.archive.sessions.push(session)
     this.emit()
-    this.report(api.saveSession(session))
+    this.persistSession(session.id, () => {
+      const current = this.archive.sessions.find((s) => s.id === session.id)
+      return current ? api.saveSession({ ...current }) : Promise.resolve()
+    })
   }
 
   deleteSession(id: string): void {
     this.onSessionInvalidation?.(id)
     this.archive.sessions = this.archive.sessions.filter((s) => s.id !== id)
     this.emit()
-    this.report(api.deleteSession(id))
+    this.persistSession(id, () => api.deleteSession(id))
   }
 
   hideWord(id: string): void {
     this.archive.preferences.hiddenWords.push(id)
     this.emit()
-    this.report(api.savePreferences(this.archive.preferences))
+    this.persistPreferences()
   }
 
   correctPassage(sessionID: string, passageID: string, text: string): void {
@@ -137,13 +175,17 @@ export class LearningStore {
     })
     this.onSessionInvalidation?.(sessionID)
     this.emit()
-    this.report(api.saveSession(session))
+    this.persistSession(sessionID, () => {
+      const current = this.archive.sessions.find((s) => s.id === sessionID)
+      return current ? api.saveSession({ ...current }) : Promise.resolve()
+    })
   }
 
   deleteAll(): void {
     this.archive.sessions.forEach((s) => this.onSessionInvalidation?.(s.id))
     this.archive.sessions = []
     this.archive.preferences.hiddenWords = []
+    this.sessionQueues.clear()
     this.emit()
     this.report(api.deleteAll())
   }

@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { useStore } from '../lib/app'
+import { useInterfaceLanguage, useStore, useT } from '../lib/app'
+import { languageName } from '../lib/i18n'
 import type { LearningStore } from '../lib/store'
 import { meaningCacheKey } from '../lib/coordinator'
 import {
@@ -18,10 +19,11 @@ const dateFmt = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' })
 const dateTimeFmt = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' })
 
 export function Sources({ sources, date }: { sources: SourceLink[]; date: number }) {
+  const t = useT()
   if (sources.length === 0) return null
   return (
     <div className="flex flex-col gap-2">
-      <div className="text-[0.8rem] text-cocoa">Sources · {dateFmt.format(date)}</div>
+      <div className="text-[0.8rem] text-cocoa">{t('transcript.sources', { date: dateFmt.format(date) })}</div>
       {sources.map((s) => {
         const url = safeURL(s)
         return url ? (
@@ -53,16 +55,17 @@ function PassageView({
   editable?: boolean
   onEdit?: (p: Passage) => void
 }) {
+  const t = useT()
   const translation =
     session.translations[meaningCacheKey(passageRevisionKey(passage), meaningLanguage)] ??
     session.translations[passageRevisionKey(passage)]
   return (
     <div className="flex w-full flex-col items-start gap-2">
       <div className="flex w-full items-center justify-between text-[0.8rem] tracking-[1px] text-cocoa">
-        <span>{passage.speaker === 'user' ? 'YOU' : 'MURAL'}</span>
+        <span>{passage.speaker === 'user' ? t('transcript.you') : t('transcript.mural')}</span>
         {editable && passage.speaker === 'user' && session.endedAt != null ? (
           <button type="button" className="text-[0.8rem] text-ink underline" onClick={() => onEdit?.(passage)}>
-            Edit
+            {t('transcript.edit')}
           </button>
         ) : null}
       </div>
@@ -95,8 +98,9 @@ export function TranscriptSheet({
   meaningLanguage: string
   onClose: () => void
 }) {
+  const t = useT()
   return (
-    <Sheet open={session != null} onOpenChange={(v) => !v && onClose()} title="Our conversation">
+    <Sheet open={session != null} onOpenChange={(v) => !v && onClose()} title={t('transcript.title')}>
       <div className="flex flex-col gap-6 px-6 pt-3 pb-10">
         {session ? (
           <>
@@ -105,11 +109,11 @@ export function TranscriptSheet({
             ))}
             <Topics session={session} />
             {session.fragments.length === 0 && session.topics.length === 0 ? (
-              <p className="text-cocoa">Your conversation will appear here.</p>
+              <p className="text-cocoa">{t('transcript.empty')}</p>
             ) : null}
           </>
         ) : (
-          <p>Start a conversation and your words will appear here.</p>
+          <p>{t('transcript.emptyIdle')}</p>
         )}
       </div>
     </Sheet>
@@ -126,9 +130,10 @@ function EditableTranscript({
   meaningLanguage: string
 }) {
   const session = store.sessions.find((s) => s.id === sessionID)
+  const t = useT()
   const [editing, setEditing] = useState<Passage | null>(null)
   const [text, setText] = useState('')
-  if (!session) return <p className="px-6 py-4 text-cocoa">This conversation was deleted.</p>
+  if (!session) return <p className="px-6 py-4 text-cocoa">{t('transcript.deleted')}</p>
   return (
     <div className="flex flex-col gap-6 px-6 pt-3 pb-10">
       {sessionPassages(session).map((p) => (
@@ -145,17 +150,16 @@ function EditableTranscript({
         />
       ))}
       <Topics session={session} />
-      <Sheet open={editing != null} onOpenChange={(v) => !v && setEditing(null)} title="What you said">
+      <Sheet open={editing != null} onOpenChange={(v) => !v && setEditing(null)} title={t('edit.title')}>
         <div className="flex flex-col gap-5 px-6 pt-2 pb-8">
           <textarea
             className="field min-h-32"
             value={text}
             onChange={(e) => setText(e.target.value)}
-            aria-label="What you said"
+aria-label={t('edit.title')}
           />
           <p className="text-[0.8rem] leading-relaxed text-cocoa">
-            Correct a misheard phrase. Learning evidence from the old wording will be removed; the
-            original remains in your backup history.
+            {t('edit.body')}
           </p>
           <button
             type="button"
@@ -165,7 +169,7 @@ function EditableTranscript({
               setEditing(null)
             }}
           >
-            Save
+            {t('edit.save')}
           </button>
         </div>
       </Sheet>
@@ -181,14 +185,16 @@ export function SessionHistorySheet({
   onOpenChange: (v: boolean) => void
 }) {
   const store = useStore()
+  const t = useT()
+  const ui = useInterfaceLanguage()
   const [selected, setSelected] = useState<SessionRecord | null>(null)
   const [deleting, setDeleting] = useState<SessionRecord | null>(null)
   return (
-    <Sheet open={open} onOpenChange={onOpenChange} title="Past conversations" wide>
+    <Sheet open={open} onOpenChange={onOpenChange} title={t('history.title')} wide>
       <div className="flex flex-col gap-1 px-6 pt-2 pb-10">
         {store.learningSessions.length === 0 ? (
           <p className="py-4 text-cocoa">
-            Your {store.language.name} conversations will appear here.
+            {t('history.empty', { language: languageName(store.language, ui) })}
           </p>
         ) : null}
         {store.learningSessions.map((s) => (
@@ -203,13 +209,13 @@ export function SessionHistorySheet({
                 className="text-[0.8rem] text-red-700/80 underline"
                 onClick={() => setDeleting(s)}
               >
-                Delete
+                {t('history.delete')}
               </button>
             ) : null}
           </div>
         ))}
       </div>
-      <Sheet open={selected != null} onOpenChange={(v) => !v && setSelected(null)} title="Our conversation" wide>
+      <Sheet open={selected != null} onOpenChange={(v) => !v && setSelected(null)} title={t('transcript.title')} wide>
         {selected ? (
           <EditableTranscript
             sessionID={selected.id}
@@ -218,10 +224,10 @@ export function SessionHistorySheet({
           />
         ) : null}
       </Sheet>
-      <Sheet open={deleting != null} onOpenChange={(v) => !v && setDeleting(null)} title="Delete conversation?">
+      <Sheet open={deleting != null} onOpenChange={(v) => !v && setDeleting(null)} title={t('delete.title')}>
         <div className="flex flex-col gap-5 px-6 pt-2 pb-8">
           <p className="text-[0.95rem] text-cocoa">
-            Delete this conversation and its learning evidence?
+            {t('delete.body')}
           </p>
           <button
             type="button"
@@ -232,7 +238,7 @@ export function SessionHistorySheet({
               setSelected(null)
             }}
           >
-            Delete conversation
+            {t('delete.confirm')}
           </button>
         </div>
       </Sheet>

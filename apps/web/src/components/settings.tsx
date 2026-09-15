@@ -1,9 +1,10 @@
 import { Download, LogOut, Share } from 'lucide-react'
 import { useRef, useState } from 'react'
-import { useCoordinator, useStore } from '../lib/app'
+import { useCoordinator, useStore, useT } from '../lib/app'
 import { api } from '../lib/api'
 import { decodeArchiveText, encodeArchiveText } from '../lib/archive'
-import { ALL_LANGUAGES, MEANING_LANGUAGES, settingsTitle } from '../lib/languages'
+import { ALL_LANGUAGES, MEANING_LANGUAGES } from '../lib/languages'
+import { INTERFACE_LANGUAGES, asInterfaceLanguage, localizedSettingsTitle, meaningLanguageName } from '../lib/i18n'
 import { useNavigate } from '@tanstack/react-router'
 import { Sheet, SettingRow, SettingSection, Toggle, Picker } from './sheet'
 
@@ -17,6 +18,7 @@ export function SettingsSheet() {
   const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [confirmingLogout, setConfirmingLogout] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
+  const t = useT()
 
   const totalVoiceSeconds = store.sessions.reduce((n, s) => n + s.voiceSeconds, 0)
   const totalSearches = store.sessions.reduce((n, s) => n + s.searchCalls, 0)
@@ -36,9 +38,9 @@ export function SettingsSheet() {
     try {
       const text = await file.text()
       await store.importArchive(decodeArchiveText(text))
-      setMessage('Your backup has been imported.')
+      setMessage(t('settings.imported'))
     } catch (e) {
-      setMessage(e instanceof Error ? e.message : 'Import failed.')
+      setMessage(e instanceof Error ? e.message : t('settings.importFailed'))
     }
   }
 
@@ -51,39 +53,52 @@ export function SettingsSheet() {
   }
 
   return (
-    <Sheet open={open} onOpenChange={(v) => coordinator.setShowSettings(v)} title="Make yourself comfortable" wide>
+    <Sheet open={open} onOpenChange={(v) => coordinator.setShowSettings(v)} title={t('settings.title')} wide>
       <div className="flex flex-col gap-7 px-6 pt-2 pb-12">
         <SettingSection
-          title="Just your pace"
+          title={t('settings.pace')}
           footer={
             coordinator.isRunning
-              ? 'End this conversation to switch languages. Each language keeps its own words and progress.'
-              : 'Each language keeps its own words and progress. Mural finds your pace through conversation.'
+              ? t('settings.paceFooterRunning')
+              : t('settings.paceFooter')
           }
         >
           <Picker
-            label="Learning language"
+            label={t('settings.learningLanguage')}
             value={coordinator.language.id}
             onChange={(v) => coordinator.selectLanguage(v)}
             options={ALL_LANGUAGES.map((l) => l.id)}
-            display={(id) => settingsTitle(ALL_LANGUAGES.find((l) => l.id === id)!)}
+            display={(id) =>
+              localizedSettingsTitle(
+                ALL_LANGUAGES.find((l) => l.id === id)!,
+                asInterfaceLanguage(store.preferences.interfaceLanguage),
+              )
+            }
             disabled={coordinator.isRunning}
           />
+          <Picker
+            label={t('settings.interfaceLanguage')}
+            value={asInterfaceLanguage(store.preferences.interfaceLanguage)}
+            onChange={(v) => coordinator.selectInterfaceLanguage(v)}
+            options={INTERFACE_LANGUAGES.map((l) => l.id)}
+            display={(id) => INTERFACE_LANGUAGES.find((l) => l.id === id)?.nativeName ?? id}
+          />
           <Toggle
-            label="Meaning subtitles"
+            label={t('settings.meaningSubtitles')}
             checked={store.preferences.meaningVisible}
             onChange={() => coordinator.toggleMeaning()}
           />
           <Picker
-            label="Meaning language"
+            label={t('settings.meaningLanguage')}
             value={store.preferences.meaningLanguage}
             onChange={(v) => coordinator.selectMeaningLanguage(v)}
             options={MEANING_LANGUAGES}
+            display={(n) => meaningLanguageName(n, asInterfaceLanguage(store.preferences.interfaceLanguage))}
           />
-          <SettingRow label="Corrections" value="Gently, as we talk" />
+          <SettingRow label={t('settings.corrections')} value={t('settings.correctionsValue')} />
           <textarea
             className="field min-h-16"
-            placeholder="A few things you enjoy"
+            placeholder={t('settings.interests')}
             value={store.preferences.interests}
             onChange={(e) =>
               store.updatePreferences((p) => {
@@ -94,41 +109,41 @@ export function SettingsSheet() {
         </SettingSection>
 
         <SettingSection
-          title="Keep it comfortable"
-          footer="Voice estimate uses $0.05/min as of 11 September 2026. Translation, teaching and search cost extra. Interrupted requests can be billed without a usage record here. Your OpenAI dashboard is authoritative. The time limit is local, not a billing cap."
+          title={t('settings.comfort')}
+          footer={t('settings.comfortFooter')}
         >
           <Picker
-            label="Conversation limit"
+            label={t('settings.limit')}
             value={store.preferences.sessionMinutes}
             onChange={(v) => store.updatePreferences((p) => (p.sessionMinutes = v))}
             options={SESSION_MINUTES}
-            display={(m) => `${m} minutes`}
+            display={(m) => t('settings.minutes', { m })}
           />
           <SettingRow
-            label="Recorded voice time"
-            value={`${Math.floor(totalVoiceSeconds / 60)} min ${Math.floor(totalVoiceSeconds % 60)} sec`}
+            label={t('settings.voiceTime')}
+            value={t('settings.voiceTimeValue', { m: Math.floor(totalVoiceSeconds / 60), s: Math.floor(totalVoiceSeconds % 60) })}
           />
           <SettingRow
-            label="Voice estimate"
+            label={t('settings.voiceEstimate')}
             value={`$${(totalVoiceSeconds / 60 * 0.05).toFixed(2)} USD`}
           />
-          <SettingRow label="Search calls recorded" value={String(totalSearches)} />
+          <SettingRow label={t('settings.searchCalls')} value={String(totalSearches)} />
           <a
             href="https://platform.openai.com/usage"
             target="_blank"
             rel="noreferrer"
             className="underline decoration-cocoa/40 underline-offset-2"
           >
-            OpenAI usage and billing
+            {t('settings.openaiUsage')}
           </a>
         </SettingSection>
 
         <SettingSection
-          title="Your words belong to you"
-          footer="Backups include transcripts and learning evidence, never account credentials. Import adds conversations with new IDs. Existing conversations stay unchanged."
+          title={t('settings.data')}
+          footer={t('settings.dataFooter')}
         >
           <button type="button" className="flex items-center gap-2.5 text-left" onClick={exportBackup}>
-            <Share size={17} className="text-cocoa" /> Export learning backup
+            <Share size={17} className="text-cocoa" /> {t('settings.export')}
           </button>
           <button
             type="button"
@@ -136,7 +151,7 @@ export function SettingsSheet() {
             disabled={coordinator.isRunning}
             onClick={() => fileRef.current?.click()}
           >
-            <Download size={17} className="text-cocoa" /> Import learning backup
+            <Download size={17} className="text-cocoa" /> {t('settings.import')}
           </button>
           <input
             ref={fileRef}
@@ -155,21 +170,20 @@ export function SettingsSheet() {
             disabled={coordinator.isRunning}
             onClick={() => setConfirmingDelete(true)}
           >
-            Delete all conversations and learning
+            {t('settings.deleteAll')}
           </button>
           {message ? <p className="text-[0.8rem] text-cocoa">{message}</p> : null}
         </SettingSection>
 
-        <SettingSection title="Help and privacy">
-          <a href="https://mural.chat/privacy/" target="_blank" rel="noreferrer" className="underline decoration-cocoa/40 underline-offset-2">Privacy policy</a>
-          <a href="https://mural.chat/terms/" target="_blank" rel="noreferrer" className="underline decoration-cocoa/40 underline-offset-2">Terms of use</a>
-          <a href="https://mural.chat/support/" target="_blank" rel="noreferrer" className="underline decoration-cocoa/40 underline-offset-2">Contact support</a>
+        <SettingSection title={t('settings.help')}>
+          <a href="https://mural.chat/privacy/" target="_blank" rel="noreferrer" className="underline decoration-cocoa/40 underline-offset-2">{t('settings.privacy')}</a>
+          <a href="https://mural.chat/terms/" target="_blank" rel="noreferrer" className="underline decoration-cocoa/40 underline-offset-2">{t('settings.terms')}</a>
+          <a href="https://mural.chat/support/" target="_blank" rel="noreferrer" className="underline decoration-cocoa/40 underline-offset-2">{t('settings.support')}</a>
         </SettingSection>
 
-        <SettingSection title="About this copy">
+        <SettingSection title={t('settings.about')}>
           <p className="text-[0.8rem] leading-relaxed text-cocoa">
-            Mural web 0.1 · Voice: GPT-Live-1 · Teacher: GPT-5.6 Luna. Audio and selected text go to
-            OpenAI while you practise; raw audio is never saved.
+            {t('settings.aboutBody')}
           </p>
           <a
             href="https://developers.openai.com/api/docs/guides/your-data"
@@ -177,26 +191,25 @@ export function SettingsSheet() {
             rel="noreferrer"
             className="text-[0.85rem] underline decoration-cocoa/40 underline-offset-2"
           >
-            OpenAI data controls
+            {t('settings.openaiData')}
           </a>
         </SettingSection>
 
-        <SettingSection title="Sign in">
+        <SettingSection title={t('settings.signin')}>
           <button
             type="button"
             className="flex items-center gap-2.5 text-left"
             onClick={() => setConfirmingLogout(true)}
           >
-            <LogOut size={17} className="text-cocoa" /> Sign out of this device
+            <LogOut size={17} className="text-cocoa" /> {t('settings.signout')}
           </button>
         </SettingSection>
       </div>
 
-      <Sheet open={confirmingDelete} onOpenChange={setConfirmingDelete} title="Delete all learning data?">
+      <Sheet open={confirmingDelete} onOpenChange={setConfirmingDelete} title={t('settings.deleteAllTitle')}>
         <div className="flex flex-col gap-5 px-6 pt-2 pb-8">
           <p className="text-[0.95rem] text-cocoa">
-            This removes conversations, vocabulary and progress. Export a backup first if you want to
-            keep them. Your preferences remain.
+            {t('settings.deleteAllBody')}
           </p>
           <button
             type="button"
@@ -206,18 +219,17 @@ export function SettingsSheet() {
               setConfirmingDelete(false)
             }}
           >
-            Delete all learning data
+            {t('settings.deleteAllConfirm')}
           </button>
         </div>
       </Sheet>
-      <Sheet open={confirmingLogout} onOpenChange={setConfirmingLogout} title="Sign out?">
+      <Sheet open={confirmingLogout} onOpenChange={setConfirmingLogout} title={t('settings.signoutTitle')}>
         <div className="flex flex-col gap-5 px-6 pt-2 pb-8">
           <p className="text-[0.95rem] text-cocoa">
-            You’ll need the shared password to sign back in. Your learning record stays on the
-            server.
+            {t('settings.signoutBody')}
           </p>
           <button type="button" className="btn-primary" onClick={() => void logout()}>
-            Sign out
+            {t('settings.signoutConfirm')}
           </button>
         </div>
       </Sheet>

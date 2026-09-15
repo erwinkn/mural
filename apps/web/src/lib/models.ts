@@ -182,6 +182,7 @@ export function correctFragment(s: SessionRecord, id: string, text: string): voi
 
 export interface Preferences {
   learningLanguageID: string
+  interfaceLanguage?: string
   meaningVisible: boolean
   meaningLanguage: string
   sessionMinutes: number
@@ -195,6 +196,7 @@ export const DEFAULT_MEANING_LANGUAGE = 'Brazilian Portuguese'
 export function defaultPreferences(defaultLanguageID: string): Preferences {
   return {
     learningLanguageID: defaultLanguageID,
+    interfaceLanguage: 'en',
     meaningVisible: true,
     meaningLanguage: DEFAULT_MEANING_LANGUAGE,
     sessionMinutes: 15,

@@ -23,12 +23,11 @@ import {
 import { makeSession } from './models'
 import { LiveTransport, type ConnectionState } from './realtime'
 import type { LearningStore } from './store'
+import { INTERFACE_LANGUAGES, type StringKey } from './i18n'
 import type { ConversationTheme } from './themes'
 import * as TeachingPolicy from './teaching'
 
 export const AI_CONSENT_VERSION = 1
-export const AI_CONSENT_SUMMARY =
-  'With your permission, Mural sends audio and selected text to OpenAI to provide conversations and meanings. Provider retention rules apply.'
 
 // ---- MeaningController ----
 
@@ -295,7 +294,7 @@ export class ConversationCoordinator {
   isMuted = false
   working = false
   error: string | null = null
-  notice: string | null = null
+  notice: StringKey | null = null
   showSettings = false
   showAIConsent = false
   private startAfterConsent = false
@@ -402,34 +401,34 @@ export class ConversationCoordinator {
   get caption(): string {
     return this.assistantPassage ? passageText(this.assistantPassage) : this.language.greeting
   }
-  get status(): string {
+  get statusKey(): StringKey {
     switch (this.state) {
       case 'idle':
-        return 'Ready when you are'
+        return 'status.idle'
       case 'connecting':
-        return 'Getting comfortable…'
+        return 'status.connecting'
       case 'active':
         return this.outputLevel > 0.02
-          ? 'Mural is speaking'
+          ? 'status.speaking'
           : this.inputLevel > 0.02
-            ? 'I’m listening'
-            : 'Take your time'
+            ? 'status.listening'
+            : 'status.waiting'
       case 'closing':
-        return 'Saving our conversation…'
+        return 'status.closing'
       case 'ended':
-        return 'Until next time'
+        return 'status.ended'
       case 'failed':
-        return 'Let’s try again'
+        return 'status.failed'
     }
   }
-  get microphoneLabel(): string {
+  get microphoneLabelKey(): StringKey {
     switch (this.state) {
       case 'active':
-        return this.isMuted ? 'Microphone muted' : 'Microphone on'
+        return this.isMuted ? 'mic.muted' : 'mic.on'
       case 'connecting':
-        return 'Connecting microphone'
+        return 'mic.connecting'
       default:
-        return 'Microphone off'
+        return 'mic.off'
     }
   }
   get meaning(): string {
@@ -558,6 +557,14 @@ export class ConversationCoordinator {
     this.emit()
   }
 
+  selectInterfaceLanguage(id: string): void {
+    if (!INTERFACE_LANGUAGES.some((l) => l.id === id)) return
+    this.store.updatePreferences((p) => {
+      p.interfaceLanguage = id
+    })
+    this.emit()
+  }
+
   chooseTheme(theme: ConversationTheme | null): void {
     if (!this.isRunning && this.session) this.resetConversation()
     this.selectedTheme = theme
@@ -599,7 +606,7 @@ export class ConversationCoordinator {
   help(): void {
     if (this.state !== 'active') return
     this.append('instructions', TeachingPolicy.helpInstructions(this.language))
-    this.notice = 'Mural will make that a little simpler.'
+    this.notice = 'notice.simpler'
     this.emit()
   }
 
@@ -651,7 +658,7 @@ export class ConversationCoordinator {
     this.scheduleTranslation()
     this.scheduleReset()
     if (!final && this.session?.providerID) {
-      this.notice = 'Conversation saved. Final voice usage is unconfirmed.'
+      this.notice = 'notice.saved'
     }
     this.emit()
   }
@@ -693,7 +700,7 @@ export class ConversationCoordinator {
       content: text.slice(0, 1000),
     })
     if (accepted) this.pendingCommands.set(id, Date.now())
-    else this.notice = 'A conversation update couldn’t be sent. You can keep speaking.'
+    else this.notice = 'notice.updateFailed'
     return accepted
   }
 
@@ -778,8 +785,7 @@ export class ConversationCoordinator {
         const details = event.error as Record<string, unknown> | undefined
         const id = details?.client_event_id as string | undefined
         if (id) this.pendingCommands.delete(id)
-        this.notice =
-          'A voice update was rejected. If Mural stops responding, end this conversation and start again.'
+        this.notice = 'notice.updateRejected'
         this.emit()
         break
       }
@@ -797,12 +803,12 @@ export class ConversationCoordinator {
     this.durationTimer = window.setInterval(() => {
       if (this.state !== 'active' || !this.session) return
       if (Date.now() - this.session.startedAt > this.store.preferences.sessionMinutes * 60_000) {
-        this.notice = 'You’ve reached your conversation time limit.'
+        this.notice = 'notice.timeLimit'
         this.end('Time limit')
         return
       }
       if (Date.now() - this.lastActivity > 120_000) {
-        this.notice = 'Mural ended this quiet session to avoid running up usage.'
+        this.notice = 'notice.idleEnd'
         this.end('Inactivity')
         return
       }
@@ -1003,7 +1009,7 @@ export class ConversationCoordinator {
           }
           if (this.session?.id !== snapshot.id || this.state !== 'active') return
           this.append('commentary', this.language.lookupUnavailableReply, id)
-          this.notice = 'The lookup wasn’t completed.'
+          this.notice = 'notice.lookupIncomplete'
         } finally {
           this.delegationTimers.delete(id)
           this.working = this.delegationTimers.size > 0

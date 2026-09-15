@@ -19,10 +19,11 @@ import {
   type WordLookup,
 } from '../../components/sheets'
 import { TranscriptSheet } from '../../components/transcript'
-import { useCoordinator, useStore } from '../../lib/app'
+import { useCoordinator, useInterfaceLanguage, useStore, useT } from '../../lib/app'
 import { captionSegments } from '../../lib/learning'
 import { passageText, type SessionRecord } from '../../lib/models'
 import { meaningGreeting } from '../../lib/languages'
+import { languageName } from '../../lib/i18n'
 
 export const Route = createFileRoute('/_app/')({
   component: TalkPage,
@@ -31,6 +32,8 @@ export const Route = createFileRoute('/_app/')({
 function TalkPage() {
   const coordinator = useCoordinator()
   const store = useStore()
+  const t = useT()
+  const ui = useInterfaceLanguage()
   const [typing, setTyping] = useState(false)
   const [transcript, setTranscript] = useState<SessionRecord | null>(null)
   const [lookup, setLookup] = useState<WordLookup | null>(null)
@@ -46,7 +49,7 @@ function TalkPage() {
     <div className="flex min-h-[calc(100dvh-160px)] flex-col items-center px-6">
       <div className="pt-3">
         <span className="rounded-full bg-butter/60 px-4 py-2 text-[0.8rem] font-medium text-cocoa">
-          {coordinator.selectedTheme?.title ?? `A little everyday ${coordinator.language.name}`}
+          {coordinator.selectedTheme?.title ?? t('talk.untitledTheme', { language: languageName(coordinator.language, ui) })}
         </span>
       </div>
 
@@ -57,7 +60,7 @@ function TalkPage() {
           className="w-[190px] sm:w-[220px]"
         />
         <p className="pt-4 text-[0.8rem] text-cocoa" aria-live="polite">
-          {coordinator.status}
+          {t(coordinator.statusKey)}
         </p>
       </div>
 
@@ -88,13 +91,13 @@ function TalkPage() {
             <p className="text-[0.95rem] text-cocoa select-text" aria-live="polite">
               {passage == null
                 ? meaningGreeting(store.preferences.meaningLanguage)
-                : coordinator.meaning || (coordinator.translating ? 'Finding the meaning…' : '')}
+                : coordinator.meaning || (coordinator.translating ? t('talk.translating') : '')}
             </p>
             {coordinator.meaningError ? (
               <div className="flex flex-col items-center gap-1.5 text-[0.8rem]">
                 <p className="text-cocoa">{coordinator.meaningError}</p>
                 <button type="button" className="underline" onClick={() => coordinator.retryMeaning()}>
-                  Try meaning again
+                  {t('talk.retryMeaning')}
                 </button>
               </div>
             ) : null}
@@ -102,13 +105,13 @@ function TalkPage() {
         ) : null}
         {user ? (
           <p className="flex items-baseline gap-1.5 pt-1 text-[0.8rem] text-cocoa">
-            <span className="text-[0.7rem] font-medium">YOU</span>
+            <span className="text-[0.7rem] font-medium">{t('transcript.you')}</span>
             <span>{passageText(user).slice(-160)}</span>
           </p>
         ) : null}
         {coordinator.working ? (
           <p className="flex items-center gap-2 text-[0.8rem] text-cocoa">
-            <Loader2 size={14} className="spin" /> Checking that for you…
+            <Loader2 size={14} className="spin" /> {t('talk.checking')}
           </p>
         ) : null}
         {sources.length > 0 ? (
@@ -117,7 +120,7 @@ function TalkPage() {
             className="text-[0.8rem] underline"
             onClick={() => setTranscript(coordinator.session)}
           >
-            Sources
+            {t('talk.sources')}
           </button>
         ) : null}
       </div>
@@ -126,7 +129,7 @@ function TalkPage() {
         <button
           type="button"
           className="flex flex-col items-center gap-1.5"
-          aria-label={meaningOn ? 'Hide meaning subtitles' : 'Show meaning subtitles'}
+          aria-label={meaningOn ? t('talk.hideMeanings') : t('talk.showMeanings')}
           onClick={() => coordinator.toggleMeaning()}
         >
           <span
@@ -136,7 +139,7 @@ function TalkPage() {
           >
             <Captions size={21} />
           </span>
-          <span className="text-[0.7rem]">Meaning</span>
+          <span className="text-[0.7rem]">{t('talk.meaning')}</span>
         </button>
 
         <button
@@ -144,7 +147,7 @@ function TalkPage() {
           className="-translate-y-2.5"
           disabled={coordinator.state === 'connecting' || coordinator.state === 'closing'}
           aria-label={
-            active ? (coordinator.isMuted ? 'Unmute microphone' : 'Mute microphone') : 'Start conversation'
+            active ? (coordinator.isMuted ? t('talk.unmute') : t('talk.mute')) : t('talk.start')
           }
           onClick={() => (active ? coordinator.toggleMute() : coordinator.start())}
         >
@@ -163,41 +166,41 @@ function TalkPage() {
           type="button"
           className="flex flex-col items-center gap-1.5"
           disabled={coordinator.session == null}
-          aria-label={running ? 'End conversation' : 'Conversation transcript'}
+          aria-label={running ? t('talk.endAria') : t('talk.transcriptAria')}
           onClick={() => (running ? coordinator.end() : setTranscript(coordinator.session))}
         >
           <span className="glass flex size-12 items-center justify-center rounded-full">
             {running ? <PhoneOff size={20} /> : <MessageSquareText size={20} />}
           </span>
-          <span className="text-[0.7rem]">{running ? 'End' : 'Transcript'}</span>
+          <span className="text-[0.7rem]">{running ? t('talk.end') : t('talk.transcript')}</span>
         </button>
       </div>
-      <p className="pt-3 text-[0.7rem] text-cocoa">{coordinator.microphoneLabel}</p>
+      <p className="pt-3 text-[0.7rem] text-cocoa">{t(coordinator.microphoneLabelKey)}</p>
 
       <div className="flex items-center gap-6 pt-2 pb-3 text-[0.85rem]">
         {active ? (
           <>
             <button type="button" className="flex items-center gap-1.5" onClick={() => setTyping(true)}>
-              <Keyboard size={16} /> Type instead
+              <Keyboard size={16} /> {t('talk.typeInstead')}
             </button>
             <button type="button" className="flex items-center gap-1.5" onClick={() => coordinator.help()}>
-              <Sparkles size={16} /> A little help
+              <Sparkles size={16} /> {t('talk.help')}
             </button>
           </>
         ) : coordinator.session == null ? (
-          <p className="text-cocoa">Reply in whichever language comes to you.</p>
+          <p className="text-cocoa">{t('talk.replyHint')}</p>
         ) : !running ? (
           <button
             type="button"
             className="flex items-center gap-1.5"
             onClick={() => coordinator.resetConversation()}
           >
-            <RotateCcw size={16} /> New conversation
+            <RotateCcw size={16} /> {t('talk.new')}
           </button>
         ) : null}
       </div>
       {coordinator.notice ? (
-        <p className="pb-4 text-center text-[0.85rem] text-cocoa">{coordinator.notice}</p>
+        <p className="pb-4 text-center text-[0.85rem] text-cocoa">{t(coordinator.notice)}</p>
       ) : null}
 
       <TypedReplySheet open={typing} onOpenChange={setTyping} />

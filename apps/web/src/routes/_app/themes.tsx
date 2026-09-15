@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { PageHeading } from '../../components/brand'
 import { ThemeIcon } from '../../components/icons'
 import { CurrentTopicSheet } from '../../components/sheets'
-import { useCoordinator } from '../../lib/app'
+import { useCoordinator, useT } from '../../lib/app'
 import { moduleThemes } from '../../lib/languages'
 import type { ConversationTheme } from '../../lib/themes'
 
@@ -16,6 +16,7 @@ export const Route = createFileRoute('/_app/themes')({
 
 function ThemesPage() {
   const coordinator = useCoordinator()
+  const t = useT()
   const navigate = useNavigate()
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('All')
@@ -39,9 +40,9 @@ function ThemesPage() {
   return (
     <div className="flex flex-col gap-6 px-6 pt-6">
       <PageHeading
-        eyebrow="A place to begin"
-        title={'What’s on\nyour mind?'}
-        subtitle="Same friend. Somewhere new."
+        eyebrow={t('themes.eyebrow')}
+        title={t('themes.title')}
+        subtitle={t('themes.subtitle')}
       />
 
       <button
@@ -50,7 +51,7 @@ function ThemesPage() {
         onClick={() => choose(null)}
       >
         <AudioWaveform size={20} />
-        Just talk
+        {t('themes.justTalk')}
         <ArrowUpRight size={18} className="ml-auto" />
       </button>
 
@@ -58,7 +59,7 @@ function ThemesPage() {
         <Search size={17} className="shrink-0 text-cocoa" />
         <input
           className="w-full bg-transparent outline-none placeholder:text-cocoa/60"
-          placeholder="Find a conversation"
+          placeholder={t('themes.search')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -75,7 +76,7 @@ function ThemesPage() {
             }`}
             onClick={() => setCategory(c)}
           >
-            {c}
+            {c === 'All' ? t('themes.all') : c}
           </button>
         ))}
       </div>
@@ -97,7 +98,7 @@ function ThemesPage() {
         ))}
       </div>
       {themes.length === 0 ? (
-        <p className="py-8 text-center text-cocoa">No conversations match “{search}”.</p>
+        <p className="py-8 text-center text-cocoa">{t('themes.none', { search })}</p>
       ) : null}
 
       <CurrentTopicSheet

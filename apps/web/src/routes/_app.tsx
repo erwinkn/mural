@@ -12,7 +12,7 @@ import { ConsentSheet } from '../components/sheets'
 import { SettingsSheet } from '../components/settings'
 import { Sheet } from '../components/sheet'
 import { api, AuthError } from '../lib/api'
-import { AppProvider, useApp, useCoordinator, useStore } from '../lib/app'
+import { AppProvider, useApp, useCoordinator, useStore, useT } from '../lib/app'
 import { authStateFn } from '../server/fns'
 
 export const Route = createFileRoute('/_app')({
@@ -24,9 +24,9 @@ export const Route = createFileRoute('/_app')({
 })
 
 const TABS = [
-  { to: '/', label: 'Talk', icon: AudioWaveform },
-  { to: '/themes', label: 'Themes', icon: LayoutGrid },
-  { to: '/words', label: 'Words', icon: Book },
+  { to: '/', label: 'tab.talk', icon: AudioWaveform },
+  { to: '/themes', label: 'tab.themes', icon: LayoutGrid },
+  { to: '/words', label: 'tab.words', icon: Book },
 ] as const
 
 function AppLayout() {
@@ -41,6 +41,7 @@ function Shell() {
   const app = useApp()
   const store = useStore()
   const coordinator = useCoordinator()
+  const t = useT()
   const navigate = useNavigate()
   const pathname = useRouterState({ select: (s) => s.location.pathname })
   const isOnboarding = pathname === '/onboarding'
@@ -97,7 +98,7 @@ function Shell() {
           <button
             type="button"
             className="glass flex size-11 items-center justify-center rounded-full text-ink"
-            aria-label="Settings"
+            aria-label={t('shell.settings')}
             onClick={() => coordinator.setShowSettings(true)}
           >
             <SlidersHorizontal size={19} />
@@ -110,7 +111,7 @@ function Shell() {
           <Outlet />
         ) : (
           <div className="flex min-h-[60dvh] items-center justify-center gap-2 text-cocoa">
-            <Loader2 size={18} className="spin" /> Warming up…
+            <Loader2 size={18} className="spin" /> {t('shell.warming')}
           </div>
         )}
       </main>
@@ -125,7 +126,7 @@ function Shell() {
               onClick={() => void navigate({ to })}
             >
               <Icon size={20} />
-              {label}
+              {t(label)}
             </button>
           ))}
         </nav>
@@ -133,11 +134,11 @@ function Shell() {
 
       <SettingsSheet />
       <ConsentSheet />
-      <Sheet open={alertMessage != null} onOpenChange={(v) => !v && closeAlert()} title="A little interruption">
+      <Sheet open={alertMessage != null} onOpenChange={(v) => !v && closeAlert()} title={t('alert.title')}>
         <div className="flex flex-col gap-5 px-6 pt-2 pb-8">
           <p className="text-[0.95rem]">{alertMessage}</p>
           <button type="button" className="btn-primary" onClick={closeAlert}>
-            OK
+            {t('alert.ok')}
           </button>
         </div>
       </Sheet>

@@ -1,6 +1,7 @@
 // Port of apps/ios/Core/LearningEngine.swift + CaptionWords segmentation.
 
 import { moduleFor, DEFAULT_LANGUAGE_ID } from './languages'
+import type { StringKey } from './i18n'
 import {
   passageEndMS,
   passageRevisionKey,
@@ -25,14 +26,16 @@ export interface WordState {
   lastSeen: number
   dueAt: number
 }
-export function wordLabel(w: WordState): string {
-  return ['New', 'Fragile', 'Growing', 'Steady'][Math.min(3, Math.max(0, w.bars))]
+export function wordLabelKey(w: WordState): StringKey {
+  return (['word.new', 'word.fragile', 'word.growing', 'word.steady'] as const)[
+    Math.min(3, Math.max(0, w.bars))
+  ]
 }
-export function wordExplanation(w: WordState): string {
-  if (w.independentCount === 0) return 'Heard or used with support. Try using it in your own words.'
-  if (w.bars === 1) return 'Used independently. We’ll bring it back soon.'
-  if (w.bars === 2) return 'Recalled on different days. Still worth revisiting.'
-  return 'Recalled across days and contexts. Strength can fade with time.'
+export function wordExplanationKey(w: WordState): StringKey {
+  if (w.independentCount === 0) return 'word.expl0'
+  if (w.bars === 1) return 'word.expl1'
+  if (w.bars === 2) return 'word.expl2'
+  return 'word.expl3'
 }
 
 export interface LearnerState {
@@ -42,8 +45,8 @@ export interface LearnerState {
   capabilities: string[]
   words: WordState[]
 }
-export function levelLabel(l: LearnerState): string {
-  return l.observationCount < 4 ? 'Getting to know you' : 'Finding your pace'
+export function levelLabelKey(l: LearnerState): StringKey {
+  return l.observationCount < 4 ? 'level.new' : 'level.pace'
 }
 
 function startOfDay(t: number): number {

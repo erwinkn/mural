@@ -4,8 +4,9 @@ import { useState } from 'react'
 import { PageHeading, RecallBars } from '../../components/brand'
 import { WordDetailSheet } from '../../components/sheets'
 import { SessionHistorySheet } from '../../components/transcript'
-import { useCoordinator, useStore } from '../../lib/app'
-import { wordLabel, type WordState } from '../../lib/learning'
+import { useCoordinator, useInterfaceLanguage, useStore, useT } from '../../lib/app'
+import { languageName } from '../../lib/i18n'
+import { wordLabelKey, type WordState } from '../../lib/learning'
 
 export const Route = createFileRoute('/_app/words')({
   component: WordsPage,
@@ -14,6 +15,8 @@ export const Route = createFileRoute('/_app/words')({
 function WordsPage() {
   const coordinator = useCoordinator()
   const store = useStore()
+  const t = useT()
+  const ui = useInterfaceLanguage()
   const [search, setSearch] = useState('')
   const [selected, setSelected] = useState<WordState | null>(null)
   const [sessions, setSessions] = useState(false)
@@ -29,16 +32,16 @@ function WordsPage() {
   return (
     <div className="flex flex-col gap-6 px-6 pt-6">
       <PageHeading
-        eyebrow={`Little by little · ${coordinator.language.name}`}
-        title="Your words."
-        subtitle="Familiar words, ready for another conversation."
+        eyebrow={t('words.eyebrow', { language: languageName(coordinator.language, ui) })}
+        title={t('words.title')}
+        subtitle={t('words.subtitle')}
       />
 
       <label className="field flex items-center gap-2.5 !py-3.5">
         <Search size={17} className="shrink-0 text-cocoa" />
         <input
           className="w-full bg-transparent outline-none placeholder:text-cocoa/60"
-          placeholder="Find a word"
+          placeholder={t('words.search')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -48,12 +51,15 @@ function WordsPage() {
         <div className="flex flex-col items-start gap-4 rounded-[28px] bg-sage p-7">
           <Leaf size={34} strokeWidth={1.5} aria-hidden />
           <h2 className="text-2xl font-medium">
-            {search ? 'No matching words yet.' : 'They’ll grow from here.'}
+            {search ? t('words.emptySearchTitle') : t('words.emptyTitle')}
           </h2>
           <p className="text-[0.95rem] text-cocoa">
             {search
-              ? `Try another ${coordinator.language.name} word or English meaning.`
-              : 'As we talk, useful words and phrases find a home here. Their strength grows when you recall them over time.'}
+              ? t('words.emptySearchBody', {
+                  language: languageName(coordinator.language, ui),
+                  meaning: store.preferences.meaningLanguage,
+                })
+              : t('words.emptyBody')}
           </p>
         </div>
       ) : (
@@ -71,7 +77,7 @@ function WordsPage() {
                 </span>
                 <span className="flex shrink-0 flex-col items-end gap-2">
                   <RecallBars count={w.bars} />
-                  <span className="text-[0.7rem] text-cocoa">{wordLabel(w)}</span>
+                  <span className="text-[0.7rem] text-cocoa">{t(wordLabelKey(w))}</span>
                 </span>
               </button>
             </div>
@@ -80,25 +86,24 @@ function WordsPage() {
       )}
 
       <div className="flex justify-between text-[0.8rem] text-cocoa">
-        <span>1 · Fragile</span>
-        <span>2 · Growing</span>
-        <span>3 · Steady</span>
+        <span>{t('words.legend', { n: 1, label: t('word.fragile') })}</span>
+        <span>{t('words.legend', { n: 2, label: t('word.growing') })}</span>
+        <span>{t('words.legend', { n: 3, label: t('word.steady') })}</span>
       </div>
       <p className="text-[0.85rem] leading-relaxed text-cocoa">
-        The bars estimate spoken recall, not permanent mastery. Using a word with visible meanings
-        counts as supported practice.
+        {t('words.legendNote')}
       </p>
 
       {learner.capabilities.length > 0 ? (
         <div className="flex flex-col gap-3 rounded-3xl bg-butter p-6">
-          <h2 className="text-xl font-semibold">Finding your voice</h2>
+          <h2 className="text-xl font-semibold">{t('words.capabilities')}</h2>
           {learner.capabilities.map((c) => (
             <p key={c} className="text-[0.95rem]">
               {c}
             </p>
           ))}
           <p className="text-[0.8rem] text-cocoa">
-            Observed across conversations. These are provisional, not formal level certificates.
+            {t('words.capNote')}
           </p>
         </div>
       ) : null}
@@ -108,7 +113,7 @@ function WordsPage() {
         className="flex items-center gap-2 py-2 text-[0.95rem]"
         onClick={() => setSessions(true)}
       >
-        <History size={17} /> Past conversations
+        <History size={17} /> {t('words.past')}
       </button>
 
       <WordDetailSheet word={selected} onClose={() => setSelected(null)} />

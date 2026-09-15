@@ -1,9 +1,11 @@
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { useT } from '../lib/app'
 import { pinyinReading } from '../lib/pinyin'
 
 /// Optional pinyin reading under Han text; loads pinyin-pro on demand.
 export function PinyinHelp({ text }: { text: string }) {
+  const t = useT()
   const [reading, setReading] = useState<string | null>(null)
   const [expanded, setExpanded] = useState(true)
 
@@ -27,7 +29,7 @@ export function PinyinHelp({ text }: { text: string }) {
         onClick={() => setExpanded((v) => !v)}
       >
         {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-        {expanded ? 'Hide pinyin' : 'Show pinyin'}
+        {expanded ? t('pinyin.hide') : t('pinyin.show')}
       </button>
       {expanded ? <p className="text-[0.95rem] select-text">{reading}</p> : null}
     </div>

@@ -1,6 +1,7 @@
 import { createContext, useContext, useMemo, useSyncExternalStore, type ReactNode } from 'react'
 import { ConversationCoordinator } from './coordinator'
 import { LearningStore } from './store'
+import { interfaceLanguageOf, translate, type Params, type StringKey } from './i18n'
 
 export interface App {
   store: LearningStore
@@ -35,4 +36,35 @@ export function useCoordinator(): ConversationCoordinator {
   const { coordinator } = useApp()
   useSyncExternalStore(coordinator.subscribe, coordinator.getVersion, coordinator.getVersion)
   return coordinator
+}
+
+const noopSubscribe = () => () => {}
+const zeroVersion = () => 0
+
+/// Interface-language translator bound to the user's preference. Falls back to
+/// the default language outside AppProvider (e.g. the login page).
+export function useT() {
+  const app = useContext(AppContext)
+  useSyncExternalStore(
+    app ? app.store.subscribe : noopSubscribe,
+    app ? app.store.getVersion : zeroVersion,
+    app ? app.store.getVersion : zeroVersion,
+  )
+  const lang = interfaceLanguageOf(app?.store.preferences ?? {})
+  return useMemo(
+    () => (key: StringKey, params?: Params) => translate(lang, key, params),
+    [lang],
+  )
+}
+
+/// The active interface language ('en', 'pt-BR', …) — for localizing
+/// interpolated values like language names.
+export function useInterfaceLanguage() {
+  const app = useContext(AppContext)
+  useSyncExternalStore(
+    app ? app.store.subscribe : noopSubscribe,
+    app ? app.store.getVersion : zeroVersion,
+    app ? app.store.getVersion : zeroVersion,
+  )
+  return interfaceLanguageOf(app?.store.preferences ?? {})
 }
