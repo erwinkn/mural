@@ -50,7 +50,7 @@ async function request(url: string, body: unknown, timeout = 15_000): Promise<Re
     },
     body: JSON.stringify(body),
     signal: AbortSignal.timeout(timeout),
-    redirect: 'error',
+    redirect: 'manual',
   })
 }
 
