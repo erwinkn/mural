@@ -11,7 +11,7 @@
     {
       "binding": "DB",
       "database_name": "mural-web",
-      "database_id": "REPLACE_WITH_D1_ID",
+      "database_id": "7ac3ca9d-7eeb-4c48-907e-b07238bc5b76",
       "migrations_dir": "drizzle"
     }
   ],
