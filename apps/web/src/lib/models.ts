@@ -196,7 +196,7 @@ export const DEFAULT_MEANING_LANGUAGE = 'Brazilian Portuguese'
 export function defaultPreferences(defaultLanguageID: string): Preferences {
   return {
     learningLanguageID: defaultLanguageID,
-    interfaceLanguage: 'en',
+    interfaceLanguage: 'fr',
     meaningVisible: true,
     meaningLanguage: DEFAULT_MEANING_LANGUAGE,
     sessionMinutes: 15,

@@ -14,7 +14,7 @@ export const INTERFACE_LANGUAGES = [
 
 export type InterfaceLanguage = (typeof INTERFACE_LANGUAGES)[number]['id']
 
-export const DEFAULT_INTERFACE_LANGUAGE: InterfaceLanguage = 'en'
+export const DEFAULT_INTERFACE_LANGUAGE: InterfaceLanguage = 'fr'
 
 /// Which meaning language to preselect for a given interface language.
 export const INTERFACE_TO_MEANING: Record<InterfaceLanguage, string> = {
