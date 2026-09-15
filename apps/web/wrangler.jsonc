@@ -1,0 +1,23 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "mural-web",
+  "compatibility_date": "2026-09-15",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "@tanstack/react-start/server-entry",
+  "observability": {
+    "enabled": true
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "mural-web",
+      "database_id": "REPLACE_WITH_D1_ID",
+      "migrations_dir": "drizzle"
+    }
+  ],
+  "vars": {
+    "OPENAI_BASE_URL": "https://api.openai.com",
+    "VOICE_MODEL": "gpt-live-1",
+    "TEXT_MODEL": "gpt-5.6-luna"
+  }
+}
