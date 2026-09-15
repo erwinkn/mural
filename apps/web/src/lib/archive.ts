@@ -4,7 +4,7 @@
 // exports stay readable by the iPhone/Android clients and vice versa.
 
 import { DEFAULT_LANGUAGE_ID, moduleFor } from './languages'
-import { invalidateChangedAssessments, type Archive, type Preferences, type SessionRecord } from './models'
+import { defaultPreferences, invalidateChangedAssessments, type Archive, type Preferences, type SessionRecord } from './models'
 import { validateAssessment } from './learning'
 
 const APPLE_EPOCH_OFFSET_MS = 978_307_200_000 // 2001-01-01T00:00:00Z
@@ -191,13 +191,5 @@ export function encodeArchiveText(archive: Archive): string {
 }
 
 export function defaultPreferencesWith(languageID = DEFAULT_LANGUAGE_ID): Preferences {
-  return {
-    learningLanguageID: languageID,
-    meaningVisible: true,
-    meaningLanguage: 'English',
-    sessionMinutes: 15,
-    hiddenWords: [],
-    interests: '',
-    hasOnboarded: false,
-  }
+  return defaultPreferences(languageID)
 }

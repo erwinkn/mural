@@ -7,6 +7,7 @@ import { PinyinHelp } from '../../components/pinyin'
 import { Picker } from '../../components/sheet'
 import { useApp } from '../../lib/app'
 import { AI_CONSENT_SUMMARY, AI_CONSENT_VERSION } from '../../lib/coordinator'
+import { DEFAULT_MEANING_LANGUAGE } from '../../lib/models'
 import {
   ALL_LANGUAGES,
   MEANING_LANGUAGES,
@@ -53,7 +54,7 @@ function OnboardingPage() {
   const [targetID, setTargetID] = useState(coordinator.language.id)
   const [meaning, setMeaning] = useState(store.preferences.meaningLanguage)
   const [chosenMeaning, setChosenMeaning] = useState(
-    store.preferences.meaningLanguage !== 'English' ||
+    store.preferences.meaningLanguage !== DEFAULT_MEANING_LANGUAGE ||
       store.preferences.hasOnboarded,
   )
   const [greetingIndex, setGreetingIndex] = useState(0)

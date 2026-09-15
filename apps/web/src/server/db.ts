@@ -61,7 +61,7 @@ export async function savePreferences(prefs: Preferences): Promise<void> {
 
 export async function deleteAll(): Promise<void> {
   await db().delete(sessions)
-  await savePreferences({ ...defaultPreferencesWith(), learningLanguageID: 'nb' })
+  await savePreferences(defaultPreferencesWith())
 }
 
 /// Merge an imported archive into the stored one (same semantics as the

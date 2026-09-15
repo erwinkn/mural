@@ -231,21 +231,22 @@ const mandarin: LanguageModule = {
   },
 }
 
-export const DEFAULT_LANGUAGE_ID = 'nb'
+export const DEFAULT_LANGUAGE_ID = 'en'
 export const ALL_LANGUAGES: LanguageModule[] = [norwegian, spanish, english, french, german, italian, portuguese, mandarin]
 export function moduleFor(id: string): LanguageModule | undefined {
   return ALL_LANGUAGES.find((l) => l.id === id)
 }
 
 export const MEANING_LANGUAGES = [
-  'English', 'French', 'German', 'Spanish', 'Norwegian', 'Portuguese', 'Italian',
-  'Chinese (Simplified)', 'Polish', 'Arabic', 'Ukrainian',
+  'English', 'French', 'German', 'Spanish', 'Norwegian', 'Portuguese',
+  'Brazilian Portuguese', 'Italian', 'Chinese (Simplified)', 'Polish', 'Arabic',
+  'Ukrainian',
 ]
 export function meaningGreeting(language: string): string {
   return (
     {
       English: 'Hi!', French: 'Salut !', German: 'Hallo!', Spanish: '¡Hola!',
-      Norwegian: 'Hei!', Portuguese: 'Olá!', Italian: 'Ciao!',
+      Norwegian: 'Hei!', Portuguese: 'Olá!', 'Brazilian Portuguese': 'Olá!', Italian: 'Ciao!',
       'Chinese (Simplified)': '你好！', Chinese: '你好！', Polish: 'Cześć!',
       Arabic: 'مرحبًا!', Ukrainian: 'Привіт!',
     } as Record<string, string>

@@ -3,7 +3,7 @@
 
 import { api, AuthError } from './api'
 import { defaultPreferencesWith } from './archive'
-import { moduleFor, defaultTitle } from './languages'
+import { moduleFor, defaultTitle, DEFAULT_LANGUAGE_ID } from './languages'
 import { projectLearner, type LearnerState } from './learning'
 import {
   correctFragment,
@@ -77,7 +77,7 @@ export class LearningStore {
     return this.archive.preferences
   }
   get language() {
-    return moduleFor(this.preferences.learningLanguageID) ?? moduleFor('nb')!
+    return moduleFor(this.preferences.learningLanguageID) ?? moduleFor(DEFAULT_LANGUAGE_ID)!
   }
   get sessions(): SessionRecord[] {
     return [...this.archive.sessions].sort((a, b) => b.startedAt - a.startedAt)

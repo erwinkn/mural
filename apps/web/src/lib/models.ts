@@ -190,11 +190,13 @@ export interface Preferences {
   hasOnboarded: boolean
   aiConsentVersion?: number
 }
+export const DEFAULT_MEANING_LANGUAGE = 'Brazilian Portuguese'
+
 export function defaultPreferences(defaultLanguageID: string): Preferences {
   return {
     learningLanguageID: defaultLanguageID,
     meaningVisible: true,
-    meaningLanguage: 'English',
+    meaningLanguage: DEFAULT_MEANING_LANGUAGE,
     sessionMinutes: 15,
     hiddenWords: [],
     interests: '',
