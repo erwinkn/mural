@@ -8,6 +8,7 @@ import type { LanguageModule } from './languages'
 
 export const INTERFACE_LANGUAGES = [
   { id: 'en', name: 'English', nativeName: 'English' },
+  { id: 'fr', name: 'French', nativeName: 'Français' },
   { id: 'pt-BR', name: 'Brazilian Portuguese', nativeName: 'Português (Brasil)' },
 ] as const
 
@@ -18,6 +19,7 @@ export const DEFAULT_INTERFACE_LANGUAGE: InterfaceLanguage = 'en'
 /// Which meaning language to preselect for a given interface language.
 export const INTERFACE_TO_MEANING: Record<InterfaceLanguage, string> = {
   en: 'English',
+  fr: 'French',
   'pt-BR': 'Brazilian Portuguese',
 }
 
@@ -469,7 +471,221 @@ const ptBR: Record<StringKey, string> = {
     'Mural não conseguiu salvar seu progresso. Exporte um backup e tente de novo.',
 }
 
-const DICTS: Record<InterfaceLanguage, Record<StringKey, string>> = { en, 'pt-BR': ptBR }
+const fr: Record<StringKey, string> = {
+  'login.title': 'Un endroit calme pour pratiquer.',
+  'login.subtitle': 'Ce Mural est privé. Saisis le mot de passe partagé.',
+  'login.password': 'Mot de passe',
+  'login.continue': 'Continuer',
+  'login.opening': 'Ouverture…',
+  'login.error': 'Connexion impossible.',
+
+  'tab.talk': 'Parler',
+  'tab.themes': 'Thèmes',
+  'tab.words': 'Mots',
+  'shell.settings': 'Réglages',
+  'shell.warming': 'Préparation…',
+  'alert.title': 'Une petite interruption',
+  'alert.ok': 'OK',
+
+  'ob.step': 'Étape {n} sur {total}',
+  'ob.interfaceTitle': 'Choisis ta langue.',
+  'ob.interfaceHint': 'Tu pourras changer ça plus tard dans les Réglages.',
+  'ob.meaningTitle': 'Un petit coup de pouce,\ndans ta langue.',
+  'ob.meaningSub': 'Choisis la langue que tu lis le plus facilement pour les significations.',
+  'ob.meaningPicker': 'Langue des sous-titres',
+  'ob.meaningHint': 'Active les significations quand tu as besoin d’un coup de main.',
+  'ob.targetTitle': 'Qu’est-ce que tu veux\nparler ?',
+  'ob.speaks': 'Mural parle {language}.',
+  'ob.continue': 'Continuer',
+  'ob.agree': 'Accepter et continuer',
+  'ob.footnote0': 'On trouvera ton rythme par la conversation.',
+  'ob.footnoteLast': 'Tu peux changer tout ça dans les Réglages.',
+  'ob.backInterface': 'Retour à la langue de l’interface',
+  'ob.backMeaning': 'Retour à la langue des sous-titres',
+
+  'consent.summary':
+    'Avec ta permission, Mural envoie l’audio et le texte sélectionné à OpenAI pour proposer des conversations et des significations. Les règles de conservation du fournisseur s’appliquent.',
+  'consent.title': 'Avant de discuter.',
+  'consent.body':
+    'Ton historique d’apprentissage reste dans ce Mural. Mural n’enregistre pas l’audio brut. Tu peux continuer à parcourir tes mots et conversations sauvegardés sans accepter.',
+  'consent.agree': 'Accepter et continuer',
+  'consent.notNow': 'Pas maintenant',
+  'consent.privacy': 'Politique de confidentialité',
+
+  'talk.untitledTheme': 'Parlons {language}',
+  'status.idle': 'Quand tu veux',
+  'status.connecting': 'On s’installe…',
+  'status.speaking': 'Mural parle',
+  'status.listening': 'Je t’écoute',
+  'status.waiting': 'Prends ton temps',
+  'status.closing': 'Sauvegarde de notre conversation…',
+  'status.ended': 'À la prochaine',
+  'status.failed': 'On réessaie',
+  'mic.on': 'Micro activé',
+  'mic.muted': 'Micro coupé',
+  'mic.connecting': 'Connexion du micro',
+  'mic.off': 'Micro désactivé',
+  'talk.translating': 'Recherche du sens…',
+  'talk.retryMeaning': 'Réessayer la signification',
+  'talk.checking': 'Je vérifie ça pour toi…',
+  'talk.sources': 'Sources',
+  'talk.meaning': 'Sens',
+  'talk.showMeanings': 'Afficher les sous-titres de sens',
+  'talk.hideMeanings': 'Masquer les sous-titres de sens',
+  'talk.mute': 'Couper le micro',
+  'talk.unmute': 'Réactiver le micro',
+  'talk.start': 'Commencer une conversation',
+  'talk.end': 'Terminer',
+  'talk.endAria': 'Terminer la conversation',
+  'talk.transcriptAria': 'Transcription de la conversation',
+  'talk.transcript': 'Transcription',
+  'talk.typeInstead': 'Écrire',
+  'talk.help': 'Un coup de main',
+  'talk.replyHint': 'Réponds dans la langue qui te vient.',
+  'talk.new': 'Nouvelle conversation',
+
+  'notice.simpler': 'Mural va simplifier un peu.',
+  'notice.saved': 'Conversation sauvegardée. L’usage vocal final n’est pas confirmé.',
+  'notice.updateFailed':
+    'Une mise à jour de la conversation n’a pas pu être envoyée. Tu peux continuer à parler.',
+  'notice.updateRejected':
+    'Une mise à jour vocale a été rejetée. Si Mural cesse de répondre, termine cette conversation et recommence.',
+  'notice.timeLimit': 'Tu as atteint la limite de temps de conversation.',
+  'notice.idleEnd': 'Mural a terminé cette session inactive pour éviter d’utiliser du crédit.',
+  'notice.lookupIncomplete': 'La recherche n’a pas abouti.',
+
+  'typed.title': 'Dis-le à ta façon.',
+  'typed.placeholder': 'Réponds en {language} ou dans une autre langue',
+  'typed.send': 'Envoyer',
+  'typed.sending': 'Envoi…',
+
+  'lookup.title': 'Un peu de sens',
+  'lookup.finding': 'Recherche du sens…',
+  'word.title': 'Mot',
+  'word.uses': '{count} utilisations autonomes · Vu pour la dernière fois le {date}',
+  'word.remove': 'Retirer de mes mots',
+  'word.new': 'Nouveau',
+  'word.fragile': 'Fragile',
+  'word.growing': 'En progrès',
+  'word.steady': 'Solide',
+  'word.expl0': 'Entendu ou utilisé avec de l’aide. Essaie de l’employer avec tes propres mots.',
+  'word.expl1': 'Utilisé tout seul. On le fera revenir bientôt.',
+  'word.expl2': 'Retrouvé des jours différents. Ça vaut encore la peine de le revoir.',
+  'word.expl3': 'Retrouvé sur plusieurs jours et contextes. La force peut s’estomper avec le temps.',
+
+  'topic.title': 'Le monde aujourd’hui',
+  'topic.heading': 'Une conversation toute fraîche.',
+  'topic.sub': 'De quoi aimerais-tu parler ?',
+  'topic.find': 'Trouver un sujet',
+  'topic.finding': 'Recherche de quelque chose d’intéressant…',
+  'topic.talk': 'En parler',
+  'topic.footnote':
+    'La recherche utilise ton compte OpenAI hébergé. Les sources restent attachées au sujet.',
+
+  'themes.eyebrow': 'Un point de départ',
+  'themes.title': 'Qu’est-ce qui\nte trotte en tête ?',
+  'themes.subtitle': 'La même compagnie. Un nouveau décor.',
+  'themes.justTalk': 'Juste parler',
+  'themes.search': 'Trouver une conversation',
+  'themes.all': 'Tous',
+  'themes.none': 'Aucune conversation ne correspond à « {search} ».',
+
+  'words.eyebrow': 'Petit à petit · {language}',
+  'words.title': 'Tes mots.',
+  'words.subtitle': 'Des mots familiers, prêts pour une autre conversation.',
+  'words.search': 'Trouver un mot',
+  'words.emptySearchTitle': 'Pas encore de mot correspondant.',
+  'words.emptyTitle': 'Ils vont grandir à partir d’ici.',
+  'words.emptySearchBody': 'Essaie un autre mot en {language} ou un sens en {meaning}.',
+  'words.emptyBody':
+    'Au fil de nos discussions, les mots et phrases utiles trouvent leur place ici. Leur force grandit quand tu les rappelles au fil du temps.',
+  'words.legend': '{n} · {label}',
+  'words.legendNote':
+    'Les barres estiment le rappel à l’oral, pas la maîtrise définitive. Utiliser un mot avec les significations visibles compte comme une pratique accompagnée.',
+  'words.capabilities': 'Ta voix prend forme',
+  'words.capNote':
+    'Observé au fil des conversations. Ce sont des indications provisoires, pas des certifications de niveau.',
+  'words.past': 'Conversations passées',
+
+  'transcript.you': 'TOI',
+  'transcript.mural': 'MURAL',
+  'transcript.title': 'Notre conversation',
+  'transcript.empty': 'Ta conversation apparaîtra ici.',
+  'transcript.emptyIdle': 'Commence une conversation et tes mots apparaîtront ici.',
+  'transcript.edit': 'Modifier',
+  'transcript.deleted': 'Cette conversation a été supprimée.',
+  'transcript.sources': 'Sources · {date}',
+  'edit.title': 'Ce que tu as dit',
+  'edit.body':
+    'Corrige une phrase mal entendue. Les preuves d’apprentissage liées à l’ancienne formulation seront supprimées ; l’original reste dans l’historique de ta sauvegarde.',
+  'edit.save': 'Enregistrer',
+  'history.title': 'Conversations passées',
+  'history.empty': 'Tes conversations en {language} apparaîtront ici.',
+  'history.delete': 'Supprimer',
+  'delete.title': 'Supprimer la conversation ?',
+  'delete.body': 'Supprimer cette conversation et ses preuves d’apprentissage ?',
+  'delete.confirm': 'Supprimer la conversation',
+
+  'settings.title': 'Mets-toi à l’aise',
+  'settings.pace': 'À ton rythme',
+  'settings.paceFooter':
+    'Chaque langue garde ses propres mots et sa progression. Mural trouve ton rythme par la conversation.',
+  'settings.paceFooterRunning':
+    'Termine cette conversation pour changer de langue. Chaque langue garde ses propres mots et sa progression.',
+  'settings.learningLanguage': 'Langue d’apprentissage',
+  'settings.interfaceLanguage': 'Langue de l’interface',
+  'settings.meaningSubtitles': 'Sous-titres de sens',
+  'settings.meaningLanguage': 'Langue des significations',
+  'settings.corrections': 'Corrections',
+  'settings.correctionsValue': 'En douceur, pendant la conversation',
+  'settings.interests': 'Quelques choses que tu aimes',
+  'settings.comfort': 'Reste confortable',
+  'settings.comfortFooter':
+    'L’estimation vocale utilise 0,05 $/min au 11 septembre 2026. La traduction, l’enseignement et la recherche coûtent en plus. Les requêtes interrompues peuvent être facturées sans relevé d’usage ici. Ton tableau de bord OpenAI fait foi. La limite de temps est locale, pas un plafond de facturation.',
+  'settings.limit': 'Limite de conversation',
+  'settings.minutes': '{m} minutes',
+  'settings.voiceTime': 'Temps vocal enregistré',
+  'settings.voiceTimeValue': '{m} min {s} s',
+  'settings.voiceEstimate': 'Estimation vocale',
+  'settings.searchCalls': 'Appels de recherche enregistrés',
+  'settings.openaiUsage': 'Usage et facturation OpenAI',
+  'settings.data': 'Tes mots t’appartiennent',
+  'settings.dataFooter':
+    'Les sauvegardes incluent les transcriptions et les preuves d’apprentissage, jamais les identifiants du compte. L’import ajoute des conversations avec de nouveaux identifiants. Les conversations existantes ne changent pas.',
+  'settings.export': 'Exporter la sauvegarde d’apprentissage',
+  'settings.import': 'Importer une sauvegarde d’apprentissage',
+  'settings.imported': 'Ta sauvegarde a été importée.',
+  'settings.importFailed': 'L’import a échoué.',
+  'settings.deleteAll': 'Supprimer toutes les conversations et l’apprentissage',
+  'settings.help': 'Aide et confidentialité',
+  'settings.privacy': 'Politique de confidentialité',
+  'settings.terms': 'Conditions d’utilisation',
+  'settings.support': 'Contacter l’assistance',
+  'settings.about': 'À propos de cette copie',
+  'settings.aboutBody':
+    'Mural web 0.1 · Voix : GPT-Live-1 · Professeur : GPT-5.6 Luna. L’audio et le texte sélectionné partent vers OpenAI pendant que tu pratiques ; l’audio brut n’est jamais sauvegardé.',
+  'settings.openaiData': 'Contrôles de données OpenAI',
+  'settings.signin': 'Connexion',
+  'settings.signout': 'Se déconnecter de cet appareil',
+  'settings.signoutTitle': 'Se déconnecter ?',
+  'settings.signoutBody':
+    'Il te faudra le mot de passe partagé pour te reconnecter. Ton historique d’apprentissage reste sur le serveur.',
+  'settings.signoutConfirm': 'Se déconnecter',
+  'settings.deleteAllTitle': 'Supprimer toutes les données d’apprentissage ?',
+  'settings.deleteAllBody':
+    'Cela supprime les conversations, le vocabulaire et la progression. Exporte d’abord une sauvegarde si tu veux les garder. Tes préférences restent.',
+  'settings.deleteAllConfirm': 'Supprimer toutes les données d’apprentissage',
+
+  'session.defaultTitle': 'Conversation en {language}',
+  'pinyin.hide': 'Masquer le pinyin',
+  'pinyin.show': 'Afficher le pinyin',
+  'level.new': 'On apprend à te connaître',
+  'level.pace': 'On trouve ton rythme',
+  'error.saveProgress':
+    'Mural n’a pas pu sauvegarder ta progression. Exporte une sauvegarde et réessaie.',
+}
+
+const DICTS: Record<InterfaceLanguage, Record<StringKey, string>> = { en, fr, 'pt-BR': ptBR }
 
 export function translate(lang: InterfaceLanguage, key: StringKey, params?: Params): string {
   let s = DICTS[lang][key] ?? en[key] ?? key
