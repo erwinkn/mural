@@ -20,8 +20,88 @@ export interface LanguageModule {
   themeOverrides: Record<string, ConversationTheme>
 }
 
+/// Every theme's title in each learning language — the card leads with the
+/// phrase the learner will practise, so titles should never fall back to
+/// English (unlike situations, which stay English teaching notes).
+const THEME_TITLES: Record<string, Record<string, string>> = {
+  nb: {
+    coffee: 'En kaffe?', weekend: 'Helgen', walk: 'En liten tur', dinner: 'Middagsplaner',
+    introductions: 'Hyggelig å møte deg', groceries: 'På markedet', travel: 'Neste stopp',
+    home: 'Ditt eget sted', friends: 'Nye venner', work: 'Mandag morgen',
+    weather: 'Regn igjen?', cabin: 'Helg på hytta', music: 'På repeat',
+    film: 'Én episode til', books: 'Mellom sidene', design: 'Fine ting',
+    technology: 'Hva skjer videre', travelstories: 'Et annet sted', restaurant: 'Et bord for to',
+    neighbours: 'Naboene', traditions: 'Livet i Norge', opinions: 'Hva synes du?',
+    future: 'Om ett år', today: 'Verden i dag',
+  },
+  es: {
+    coffee: 'Un café', weekend: 'El fin de semana', walk: 'Un paseo', dinner: 'Planes para cenar',
+    introductions: 'Mucho gusto', groceries: 'En el mercado', travel: 'Próxima parada',
+    home: 'Un lugar propio', friends: 'Nuevos amigos', work: 'Lunes por la mañana',
+    weather: '¿Otra vez lluvia?', cabin: 'Un finde fuera', music: 'En bucle',
+    film: 'Un episodio más', books: 'Entre páginas', design: 'Cosas bonitas',
+    technology: '¿Qué viene después?', travelstories: 'En otro lugar', restaurant: 'Una mesa para dos',
+    neighbours: 'Los vecinos', traditions: 'La sobremesa', opinions: '¿Tú qué piensas?',
+    future: 'Dentro de un año', today: 'El mundo hoy',
+  },
+  fr: {
+    coffee: 'Un café ?', weekend: 'Le week-end', walk: 'Une petite marche', dinner: 'Qu’est-ce qu’on mange ?',
+    introductions: 'Faire connaissance', groceries: 'Au marché', travel: 'En route',
+    home: 'Un chez-soi', friends: 'De nouveaux amis', work: 'Lundi matin',
+    weather: 'Encore la pluie ?', cabin: 'Un week-end ailleurs', music: 'En boucle',
+    film: 'Encore un épisode', books: 'Entre les pages', design: 'Les belles choses',
+    technology: 'Et demain ?', travelstories: 'Ailleurs', restaurant: 'Une table pour deux',
+    neighbours: 'Les voisins', traditions: 'À table', opinions: 'T’en penses quoi ?',
+    future: 'Dans un an', today: 'Le monde aujourd’hui',
+  },
+  de: {
+    coffee: 'Ein Kaffee?', weekend: 'Das Wochenende', walk: 'Ein kleiner Spaziergang', dinner: 'Pläne fürs Abendessen',
+    introductions: 'Schön, dich kennenzulernen', groceries: 'Auf dem Markt', travel: 'Unterwegs',
+    home: 'Ein eigenes Zuhause', friends: 'Neue Freunde', work: 'Montagmorgen',
+    weather: 'Schon wieder Regen?', cabin: 'Ein Wochenende weg', music: 'In Dauerschleife',
+    film: 'Noch eine Folge', books: 'Zwischen den Seiten', design: 'Schöne Dinge',
+    technology: 'Was kommt als Nächstes?', travelstories: 'Anderswo', restaurant: 'Ein Tisch für zwei',
+    neighbours: 'Die Nachbarn', traditions: 'Feierabend', opinions: 'Was denkst du?',
+    future: 'In einem Jahr', today: 'Die Welt heute',
+  },
+  it: {
+    coffee: 'Un caffè?', weekend: 'Il fine settimana', walk: 'Una piccola passeggiata', dinner: 'Programmi per cena',
+    introductions: 'Piacere di conoscerti', groceries: 'Al mercato', travel: 'In viaggio',
+    home: 'Un posto tutto tuo', friends: 'Nuovi amici', work: 'Lunedì mattina',
+    weather: 'Ancora pioggia?', cabin: 'Un weekend fuori', music: 'A ripetizione',
+    film: 'Ancora un episodio', books: 'Tra le pagine', design: 'Le cose belle',
+    technology: 'Cosa viene dopo', travelstories: 'Altrove', restaurant: 'Un tavolo per due',
+    neighbours: 'I vicini', traditions: 'La passeggiata', opinions: 'Tu cosa ne pensi?',
+    future: 'Tra un anno', today: 'Il mondo oggi',
+  },
+  pt: {
+    coffee: 'Um café?', weekend: 'O fim de semana', walk: 'Uma caminhada', dinner: 'Planos para o jantar',
+    introductions: 'Prazer em conhecer', groceries: 'No mercado', travel: 'Próxima parada',
+    home: 'Um lugar só seu', friends: 'Novos amigos', work: 'Segunda de manhã',
+    weather: 'Chuva de novo?', cabin: 'Um fim de semana fora', music: 'Em loop',
+    film: 'Mais um episódio', books: 'Entre as páginas', design: 'Coisas boas',
+    technology: 'O que vem a seguir', travelstories: 'Em outro lugar', restaurant: 'Uma mesa para dois',
+    neighbours: 'Os vizinhos', traditions: 'Costumes do dia a dia', opinions: 'O que você acha?',
+    future: 'Daqui a um ano', today: 'O mundo hoje',
+  },
+  zh: {
+    coffee: '喝杯咖啡？', weekend: '周末', walk: '散个步', dinner: '晚餐计划',
+    introductions: '很高兴认识你', groceries: '去买菜', travel: '下一站',
+    home: '自己的家', friends: '新朋友', work: '周一早晨',
+    weather: '又下雨了？', cabin: '周末出游', music: '单曲循环',
+    film: '再看一集', books: '书页之间', design: '好东西',
+    technology: '接下来是什么', travelstories: '在别处', restaurant: '两人桌',
+    neighbours: '邻居们', traditions: '日常习俗', opinions: '你怎么看？',
+    future: '一年以后', today: '今日世界',
+  },
+}
+
 export function moduleThemes(m: LanguageModule): ConversationTheme[] {
-  return SHARED_THEMES.map((t) => m.themeOverrides[t.id] ?? t)
+  return SHARED_THEMES.map((t) => {
+    const o = m.themeOverrides[t.id] ?? t
+    const title = THEME_TITLES[m.id]?.[t.id] ?? o.title
+    return title === o.title ? o : { ...o, title }
+  })
 }
 export function defaultTitle(m: LanguageModule): string {
   return `A little ${m.name}`
