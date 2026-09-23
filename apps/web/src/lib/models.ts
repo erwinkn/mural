@@ -74,8 +74,10 @@ export interface WordProposal {
   quote: string
   language: string
 }
+/// NFC like Android's `canonical()`: Swift compares strings by canonical
+/// equivalence, so a decomposed ё or й must key the same word as a composed one.
 export function wordKey(w: Pick<WordProposal, 'language' | 'lemma' | 'meaning'>): string {
-  return `${w.language}|${w.lemma.trim().toLowerCase()}|${w.meaning.toLowerCase()}`
+  return `${w.language}|${w.lemma.trim().toLowerCase().normalize('NFC')}|${w.meaning.toLowerCase().normalize('NFC')}`
 }
 
 export interface Assessment {

@@ -70,7 +70,7 @@ export function validateAssessment(a: Assessment, session: SessionRecord): Asses
     words: [],
   }
   const ciIncludes = (hay: string, needle: string) =>
-    hay.toLocaleLowerCase().includes(needle.toLocaleLowerCase())
+    hay.normalize('NFC').toLocaleLowerCase().includes(needle.normalize('NFC').toLocaleLowerCase())
   for (const word of a.words) {
     if (
       word.language !== session.languageID ||
@@ -126,6 +126,8 @@ export function projectLearner(
   let nextGoal =
     'Start with a greeting and one small question. Adjust from what the learner actually says.'
   const capabilityEvidence = new Map<string, Set<string>>()
+  // Keys saved before wordKey() normalized to NFC, or imported from iOS, may be decomposed.
+  const hidden = new Set(hiddenWords.map((k) => k.normalize('NFC')))
   const events = new Map<string, { word: WordProposal; at: number; context: string }[]>()
 
   for (const session of sessions
@@ -159,7 +161,7 @@ export function projectLearner(
       const seenWords = new Set<string>()
       for (const word of a.words) {
         const key = wordKey(word)
-        if (hiddenWords.includes(key) || seenWords.has(key)) continue
+        if (hidden.has(key) || seenWords.has(key)) continue
         seenWords.add(key)
         const list = events.get(key) ?? []
         list.push({ word, at: a.createdAt, context: a.context })
