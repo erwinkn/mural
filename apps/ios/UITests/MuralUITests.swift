@@ -43,6 +43,7 @@ final class MuralUITests: XCTestCase {
     func testItalianOnboarding() { checkNewOnboarding(id: "it", greeting: "Ciao!") }
     func testBrazilianPortugueseOnboarding() { checkNewOnboarding(id: "pt", greeting: "Olá!") }
     func testMandarinOnboardingWithOptionalPinyin() { checkNewOnboarding(id: "zh", greeting: "你好！") }
+    func testRussianOnboarding() { checkNewOnboarding(id: "ru", greeting: "Привет!") }
 
     func testMandarinSelectionAtLargestAccessibilityTextSize() {
         let app = XCUIApplication()
@@ -73,7 +74,8 @@ final class MuralUITests: XCTestCase {
             ("German · Germany", "German", "Hallo!", "Ein Kaffee?"),
             ("Italian · Italy", "Italian", "Ciao!", "Un caffè?"),
             ("Portuguese · Brazil", "Portuguese", "Olá!", "Um cafezinho?"),
-            ("Mandarin Chinese · Mainland China", "Mandarin Chinese", "你好！", "喝杯咖啡？")
+            ("Mandarin Chinese · Mainland China", "Mandarin Chinese", "你好！", "喝杯咖啡？"),
+            ("Russian · Standard", "Russian", "Привет!", "Чай или кофе?")
         ] {
             app.buttons["Settings"].tap()
             app.buttons["learning-language-picker"].tap()
@@ -126,6 +128,23 @@ final class MuralUITests: XCTestCase {
         app.tabBars.buttons["Words"].tap()
         app.buttons["Past conversations"].tap()
         XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "喝杯咖啡？")).firstMatch.exists)
+    }
+
+    func testRussianTranscriptKeepsCyrillicAfterReset() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--preview", "--ended-conversation", "--preview-language=ru"]
+        app.launch()
+        XCTAssertTrue(app.buttons["new-conversation"].waitForExistence(timeout: 10))
+        XCTAssertEqual(app.staticTexts["target-caption"].label, "Я люблю кофе.")
+        XCTAssertFalse(app.buttons["pinyin-toggle"].exists)
+        app.buttons["Conversation transcript"].tap()
+        XCTAssertTrue(app.staticTexts["Я люблю кофе."].exists)
+        app.buttons["Done"].tap()
+        app.buttons["new-conversation"].tap()
+        XCTAssertEqual(app.staticTexts["target-caption"].label, "Привет!")
+        app.tabBars.buttons["Words"].tap()
+        app.buttons["Past conversations"].tap()
+        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "Чай или кофе?")).firstMatch.exists)
     }
 
     private func launch(ended: Bool = false) -> XCUIApplication {

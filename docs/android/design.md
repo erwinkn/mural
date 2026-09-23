@@ -4,7 +4,7 @@
 
 Mural keeps two native clients: SwiftUI and SwiftData in `apps/ios/`, and Kotlin with Jetpack Compose in `apps/android/`. The API lives in `services/api/`. Shared fixtures and contracts keep learning data compatible while each app retains its platform audio, accessibility and animation tools.
 
-The Android client keeps the eight language modules, the 24 themes and their cultural variants, WebRTC voice, written replies, meanings, word lookup, current topics with sources, history, corrections, vocabulary and learning projection. It adds written conversation without the microphone permission. Android account and minute-purchase integration is in progress. The public hosted conversation service remains disabled; no cloud learning sync is planned.
+The Android client keeps the nine language modules, the 24 themes and their cultural variants, WebRTC voice, written replies, meanings, word lookup, current topics with sources, history, corrections, vocabulary and learning projection. It adds written conversation without the microphone permission. Android account and minute-purchase integration is in progress. The public hosted conversation service remains disabled; no cloud learning sync is planned.
 
 ## Visual system
 
@@ -16,7 +16,7 @@ The orb has a smooth twelve-point outline, warm blended color, a feathered shado
 
 Both onboarding steps use dropdown menus over a softly moving warm background. Continue stays at the bottom; content can scroll at larger text sizes. Reply entry opens in a rounded sheet with keyboard padding and a visible send action. Search, settings and other input fields share the same rounded surfaces and warm focus color.
 
-Caption taps open a cream bottom sheet with the selected word, its original sentence and an automatic contextual explanation, following the iOS lookup flow. All eight languages use this interaction. The sentence stays fixed while the conversation advances; closing the sheet cancels its request. Lookup has its own loading state so another helper cannot leave the sheet empty or have its work cancelled by dismissal.
+Caption taps open a cream bottom sheet with the selected word, its original sentence and an automatic contextual explanation, following the iOS lookup flow. All nine languages use this interaction. The sentence stays fixed while the conversation advances; closing the sheet cancels its request. Lookup has its own loading state so another helper cannot leave the sheet empty or have its work cancelled by dismissal.
 
 Mandarin keeps the inline Show/Hide pinyin control between the Chinese caption and the English meaning. The Chinese passage and its reading scroll together; the meaning retains its own visible area. Small screens and large system text use a scrolling page. Source characters and caption tap boundaries remain independent of pronunciation phrases.
 

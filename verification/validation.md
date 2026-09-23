@@ -177,3 +177,17 @@ Visual review after the full UI run found that the fixed consent footer crowded 
 After the owner unlocked the phone, the final build launched normally at 16:37:51 CEST. Its running process was confirmed. This reopened the persistent learning store without verification arguments.
 
 The device results verify the application/provider paths with synthetic typed input and real voice output. They do not verify recognition of a human speaker, pronunciation, tones, correction quality, unscripted interruptions, headphones or cellular operation. The proficient-speaker checks requested in issues #10–#13 remain open. Pinyin uses dictionary tones and may need correction for names, ambiguous words and connected-speech tone changes. The Android contribution is not integrated in this checkout, so there is no generated Android language catalog to update here.
+
+## Russian
+
+23 September 2026
+
+Russian uses stable ID `ru` and locale `ru-RU` for Standard Russian. The module adds a greeting, six teaching stages, speech and writing guidance, lemma rules, five cultural theme overrides and a Russian lookup fallback. The guidance covers case and aspect corrections, word stress, ты and вы, and the difference between е and ё. It asks for ё in lemmas, the learner's exact form and quote, and no stress marks in evidence. Russian interface text and Russian meaning subtitles are separate features and are not included.
+
+- **81 Swift core tests passed**, including a new Russian suite: Cyrillic word links with « », dashes, hyphenated words and a stress mark; distinct keys for все and всё; rejection of evidence whose form uses ё where the learner wrote е, or adds a stress mark; one vocabulary entry for ещё written with е or ё; composed and decomposed ё; archive round trip with hidden words; isolation from every other language; and redirects for Ukrainian, Belarusian, Bulgarian, Serbian and Kazakh detector IDs. The shared redirect fixture has four Russian cases.
+- **22 native UI tests passed** on the iPhone 17 simulator, including Russian onboarding, Russian settings, themes and vocabulary headings with a return to Norwegian, and a Russian transcript that keeps Cyrillic text after reset.
+- The Android content was regenerated, and `export_android_content.py --check`, `check_cross_platform.py` and the 53 script tests passed. A Russian Android unit test and a Russian caption-parity sample were added. **The Android app was not built and its tests were not run**, because this machine has no Android SDK.
+- The hosted API accepts `ru-RU`. TypeScript compilation passed, and 83 API tests passed with 273 database tests skipped because no `TEST_DATABASE_URL` was set.
+- The web module has all 24 Russian theme titles, and TypeScript checking and the production build passed. franc-min ranked about half of the Russian sample passages as Bulgarian, Serbian or Bosnian, which would trigger false redirects. Mostly Cyrillic text that has ы, э or ё, and no letters that Russian lacks, is now detected as Russian; other text is still ranked by franc. A one-off script confirmed the detection cases, 24 Cyrillic titles and Cyrillic word links. Stored hidden-word keys are compared in NFC. The web app has no committed test suite.
+
+No live voice session, real-device check or fluent-speaker review was done. Pronunciation, stress, case and aspect corrections, and the quality of the Russian theme titles still need a competent speaker's review.

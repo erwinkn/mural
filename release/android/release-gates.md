@@ -10,7 +10,7 @@ These gates apply to the candidate being uploaded. Historical tests and debug sc
 - [ ] Bundled native libraries pass 16 KB LOAD checks and RELRO layout review, generated split APKs pass `zipalign`, and WebRTC loads and runs in a confirmed 16 KB environment.
 - [ ] Reviewer/tester access works without a personal provider key. Guest availability, trial restrictions and optional BYOK costs match the listing and consent; purchases remain unavailable until the paid release gates pass.
 - [ ] Main conversations, meanings after end, 15-second reset, cancellation, offline errors, local storage, export/import and deletion pass on the candidate. Onboarding, large text, keyboard, TalkBack and reduced motion remain usable.
-- [ ] All eight supported language variants pass content checks. A short live session and transcription/meaning test run for each; proficient speakers assess the quality needed for public claims.
+- [ ] All nine supported language variants pass content checks. A short live session and transcription/meaning test run for each; proficient speakers assess the quality needed for public claims.
 - [ ] Security scan covers working tree and public history; account credentials and provider keys are absent from the AAB's resources and repository.
 - [ ] Required third-party notices remain accessible. Microphone and backup behavior match privacy copy.
 - [ ] Internal Play install uses the same uploaded bundle and succeeds on a tester account. If Google sign-in is exposed, test the Play-signed certificate, restoration, cancellation, sign-out and deletion.

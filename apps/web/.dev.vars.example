@@ -1,0 +1,12 @@
+# Local development secrets — copy to `.dev.vars` (gitignored).
+# On the deployed Worker, set each with `wrangler secret put <NAME>`.
+
+# Shared password that gates the whole app.
+APP_PASSWORD=choose-a-shared-password
+
+# OpenAI key used by the server for voice sessions, meanings, assessments.
+OPENAI_API_KEY=sk-...
+
+# Seals the auth session cookie. At least 32 characters; generate with
+# `openssl rand -base64 48`.
+SESSION_SECRET=any-long-random-string
