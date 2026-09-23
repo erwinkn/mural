@@ -1,0 +1,63 @@
+import {
+  Book,
+  Briefcase,
+  Building2,
+  CloudRain,
+  Coffee,
+  Film,
+  Flag,
+  Footprints,
+  Globe,
+  Hand,
+  House,
+  MessageCircle,
+  Mountain,
+  Music,
+  Newspaper,
+  PencilRuler,
+  Quote,
+  Send,
+  ShoppingBasket,
+  Sparkles,
+  Sunrise,
+  TramFront,
+  TreePine,
+  UtensilsCrossed,
+  Users,
+  Wine,
+  type LucideIcon,
+} from 'lucide-react'
+
+/// Maps the iOS SF Symbol names stored on ConversationTheme to lucide icons.
+const SYMBOLS: Record<string, LucideIcon> = {
+  'cup.and.saucer': Coffee,
+  'sun.horizon': Sunrise,
+  tree: TreePine,
+  'fork.knife': UtensilsCrossed,
+  'hand.wave': Hand,
+  basket: ShoppingBasket,
+  tram: TramFront,
+  house: House,
+  'person.2': Users,
+  briefcase: Briefcase,
+  'cloud.rain': CloudRain,
+  'mountain.2': Mountain,
+  'music.note': Music,
+  film: Film,
+  book: Book,
+  'pencil.and.outline': PencilRuler,
+  sparkles: Sparkles,
+  'globe.europe.africa': Globe,
+  wineglass: Wine,
+  'building.2': Building2,
+  flag: Flag,
+  'quote.bubble': Quote,
+  paperplane: Send,
+  newspaper: Newspaper,
+  'figure.walk': Footprints,
+}
+
+export function ThemeIcon({ symbol, size = 28 }: { symbol: string; size?: number }) {
+  const Icon = SYMBOLS[symbol] ?? MessageCircle
+  return <Icon size={size} strokeWidth={1.5} className="text-cocoa" aria-hidden />
+}

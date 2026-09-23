@@ -41,3 +41,8 @@ apps/android/local.properties
 apps/android/.idea/
 *.jks
 *.keystore
+
+# Web app (apps/web)
+apps/web/.dev.vars
+apps/web/dist/
+apps/web/.wrangler/

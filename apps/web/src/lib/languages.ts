@@ -1,0 +1,334 @@
+// Port of apps/ios/Core/Languages/*.swift — content and teaching policy per
+// target language. IDs are stable storage keys shared with the native apps.
+
+import { SHARED_THEMES, type ConversationTheme } from './themes'
+
+export interface LanguageModule {
+  id: string
+  name: string
+  nativeName: string
+  variety: string
+  locale: string
+  greeting: string
+  greetingWord: string
+  speechGuidance: string
+  writingGuidance: string
+  lemmaGuidance: string
+  teachingFocus: string[]
+  topicPlaceholder: string
+  lookupUnavailableReply: string
+  themeOverrides: Record<string, ConversationTheme>
+}
+
+/// Every theme's title in each learning language — the card leads with the
+/// phrase the learner will practise, so titles should never fall back to
+/// English (unlike situations, which stay English teaching notes).
+const THEME_TITLES: Record<string, Record<string, string>> = {
+  nb: {
+    coffee: 'En kaffe?', weekend: 'Helgen', walk: 'En liten tur', dinner: 'Middagsplaner',
+    introductions: 'Hyggelig å møte deg', groceries: 'På markedet', travel: 'Neste stopp',
+    home: 'Ditt eget sted', friends: 'Nye venner', work: 'Mandag morgen',
+    weather: 'Regn igjen?', cabin: 'Helg på hytta', music: 'På repeat',
+    film: 'Én episode til', books: 'Mellom sidene', design: 'Fine ting',
+    technology: 'Hva skjer videre', travelstories: 'Et annet sted', restaurant: 'Et bord for to',
+    neighbours: 'Naboene', traditions: 'Livet i Norge', opinions: 'Hva synes du?',
+    future: 'Om ett år', today: 'Verden i dag',
+  },
+  es: {
+    coffee: 'Un café', weekend: 'El fin de semana', walk: 'Un paseo', dinner: 'Planes para cenar',
+    introductions: 'Mucho gusto', groceries: 'En el mercado', travel: 'Próxima parada',
+    home: 'Un lugar propio', friends: 'Nuevos amigos', work: 'Lunes por la mañana',
+    weather: '¿Otra vez lluvia?', cabin: 'Un finde fuera', music: 'En bucle',
+    film: 'Un episodio más', books: 'Entre páginas', design: 'Cosas bonitas',
+    technology: '¿Qué viene después?', travelstories: 'En otro lugar', restaurant: 'Una mesa para dos',
+    neighbours: 'Los vecinos', traditions: 'La sobremesa', opinions: '¿Tú qué piensas?',
+    future: 'Dentro de un año', today: 'El mundo hoy',
+  },
+  fr: {
+    coffee: 'Un café ?', weekend: 'Le week-end', walk: 'Une petite marche', dinner: 'Qu’est-ce qu’on mange ?',
+    introductions: 'Faire connaissance', groceries: 'Au marché', travel: 'En route',
+    home: 'Un chez-soi', friends: 'De nouveaux amis', work: 'Lundi matin',
+    weather: 'Encore la pluie ?', cabin: 'Un week-end ailleurs', music: 'En boucle',
+    film: 'Encore un épisode', books: 'Entre les pages', design: 'Les belles choses',
+    technology: 'Et demain ?', travelstories: 'Ailleurs', restaurant: 'Une table pour deux',
+    neighbours: 'Les voisins', traditions: 'À table', opinions: 'T’en penses quoi ?',
+    future: 'Dans un an', today: 'Le monde aujourd’hui',
+  },
+  de: {
+    coffee: 'Ein Kaffee?', weekend: 'Das Wochenende', walk: 'Ein kleiner Spaziergang', dinner: 'Pläne fürs Abendessen',
+    introductions: 'Schön, dich kennenzulernen', groceries: 'Auf dem Markt', travel: 'Unterwegs',
+    home: 'Ein eigenes Zuhause', friends: 'Neue Freunde', work: 'Montagmorgen',
+    weather: 'Schon wieder Regen?', cabin: 'Ein Wochenende weg', music: 'In Dauerschleife',
+    film: 'Noch eine Folge', books: 'Zwischen den Seiten', design: 'Schöne Dinge',
+    technology: 'Was kommt als Nächstes?', travelstories: 'Anderswo', restaurant: 'Ein Tisch für zwei',
+    neighbours: 'Die Nachbarn', traditions: 'Feierabend', opinions: 'Was denkst du?',
+    future: 'In einem Jahr', today: 'Die Welt heute',
+  },
+  it: {
+    coffee: 'Un caffè?', weekend: 'Il fine settimana', walk: 'Una piccola passeggiata', dinner: 'Programmi per cena',
+    introductions: 'Piacere di conoscerti', groceries: 'Al mercato', travel: 'In viaggio',
+    home: 'Un posto tutto tuo', friends: 'Nuovi amici', work: 'Lunedì mattina',
+    weather: 'Ancora pioggia?', cabin: 'Un weekend fuori', music: 'A ripetizione',
+    film: 'Ancora un episodio', books: 'Tra le pagine', design: 'Le cose belle',
+    technology: 'Cosa viene dopo', travelstories: 'Altrove', restaurant: 'Un tavolo per due',
+    neighbours: 'I vicini', traditions: 'La passeggiata', opinions: 'Tu cosa ne pensi?',
+    future: 'Tra un anno', today: 'Il mondo oggi',
+  },
+  pt: {
+    coffee: 'Um café?', weekend: 'O fim de semana', walk: 'Uma caminhada', dinner: 'Planos para o jantar',
+    introductions: 'Prazer em conhecer', groceries: 'No mercado', travel: 'Próxima parada',
+    home: 'Um lugar só seu', friends: 'Novos amigos', work: 'Segunda de manhã',
+    weather: 'Chuva de novo?', cabin: 'Um fim de semana fora', music: 'Em loop',
+    film: 'Mais um episódio', books: 'Entre as páginas', design: 'Coisas boas',
+    technology: 'O que vem a seguir', travelstories: 'Em outro lugar', restaurant: 'Uma mesa para dois',
+    neighbours: 'Os vizinhos', traditions: 'Costumes do dia a dia', opinions: 'O que você acha?',
+    future: 'Daqui a um ano', today: 'O mundo hoje',
+  },
+  zh: {
+    coffee: '喝杯咖啡？', weekend: '周末', walk: '散个步', dinner: '晚餐计划',
+    introductions: '很高兴认识你', groceries: '去买菜', travel: '下一站',
+    home: '自己的家', friends: '新朋友', work: '周一早晨',
+    weather: '又下雨了？', cabin: '周末出游', music: '单曲循环',
+    film: '再看一集', books: '书页之间', design: '好东西',
+    technology: '接下来是什么', travelstories: '在别处', restaurant: '两人桌',
+    neighbours: '邻居们', traditions: '日常习俗', opinions: '你怎么看？',
+    future: '一年以后', today: '今日世界',
+  },
+}
+
+export function moduleThemes(m: LanguageModule): ConversationTheme[] {
+  return SHARED_THEMES.map((t) => {
+    const o = m.themeOverrides[t.id] ?? t
+    const title = THEME_TITLES[m.id]?.[t.id] ?? o.title
+    return title === o.title ? o : { ...o, title }
+  })
+}
+export function defaultTitle(m: LanguageModule): string {
+  return `A little ${m.name}`
+}
+export function talkTitle(m: LanguageModule): string {
+  return `A little everyday ${m.name}`
+}
+export function settingsTitle(m: LanguageModule): string {
+  return `${m.name} · ${m.variety}`
+}
+
+const norwegian: LanguageModule = {
+  id: 'nb', name: 'Norwegian', nativeName: 'Norsk', variety: 'Bokmål', locale: 'nb-NO',
+  greeting: 'Hei!', greetingWord: 'hei',
+  speechGuidance: 'Use natural Eastern Norwegian pronunciation. Accept other Norwegian dialects without treating dialect differences as errors.',
+  writingGuidance: 'Use Norwegian Bokmål spelling and wording.',
+  lemmaGuidance: 'Give nouns with their singular grammatical article and verbs in the infinitive, for example en tur and å gå. Accept valid gender variants.',
+  teachingFocus: [
+    'Greetings, introductions and short everyday chunks.',
+    'Simple questions, noun gender and present-tense everyday exchanges.',
+    'Connected stories, past tense, word order and familiar situations.',
+    'Reasons and opinions, subordinate clauses and natural connectors.',
+    'Nuanced discussion, idiomatic phrasing and register.',
+    'Flexible advanced conversation with precise, natural Norwegian.',
+  ],
+  topicPlaceholder: 'Design, space, life in Norway…',
+  lookupUnavailableReply: 'Jeg klarte ikke å sjekke det akkurat nå. Vi kan snakke om temaet generelt, hvis du vil.',
+  themeOverrides: {
+    groceries: { id: 'groceries', title: 'At the market', subtitle: 'Find the good tomatoes', symbol: 'basket', category: 'Everyday', situation: 'Help the learner shop at a Norwegian food market. Practise quantities and questions.', colorIndex: 2 },
+    travel: { id: 'travel', title: 'Next stop', subtitle: 'A ticket to somewhere', symbol: 'tram', category: 'Everyday', situation: 'Plan a train trip in Norway. Discuss routes and tickets without inventing current schedules.', colorIndex: 1 },
+    weather: { id: 'weather', title: 'Rain again?', subtitle: 'A very Norwegian chat', symbol: 'cloud.rain', category: 'Local life', situation: 'Talk about weather, clothing and outdoor plans in Norway. Verify current forecasts before claiming them.', colorIndex: 1 },
+    cabin: { id: 'cabin', title: 'Cabin weekend', subtitle: 'A quieter kind of day', symbol: 'mountain.2', category: 'Local life', situation: 'Plan a hytte weekend: travel, food, walks and relaxing together.', colorIndex: 2 },
+    traditions: { id: 'traditions', title: 'Life in Norway', subtitle: 'Small customs, big stories', symbol: 'flag', category: 'Local life', situation: 'Explore Norwegian everyday customs with nuance. Avoid treating all Norwegians as alike.', colorIndex: 2 },
+  },
+}
+
+const spanish: LanguageModule = {
+  id: 'es', name: 'Spanish', nativeName: 'Español', variety: 'Spain', locale: 'es-ES',
+  greeting: '¡Hola!', greetingWord: 'hola',
+  speechGuidance: 'Use clear Spanish from Spain, with a natural distinction between s and z/soft c, tú for friendly singular address and vosotros for informal plural address. Accept seseo, ustedes, voseo and other valid regional forms without marking them wrong. Do not imitate a regional caricature.',
+  writingGuidance: 'Use standard Spanish spelling, accents and opening question and exclamation marks.',
+  lemmaGuidance: 'Give nouns with their singular grammatical article and verbs in the infinitive, for example la casa and hablar. Keep reflexive verbs such as llamarse distinct. Preserve accents and ñ.',
+  teachingFocus: [
+    'Greetings, introductions and short useful chunks such as me llamo and quiero.',
+    'Everyday questions, gender and number agreement, present tense and useful ser/estar contrasts.',
+    'Connected stories, past events, object pronouns and familiar situations.',
+    'Reasons and opinions, contrasts between past tenses and common subjunctive contexts.',
+    'Nuance, hypothetical situations, register and regional variation.',
+    'Flexible advanced discussion with precise, idiomatic Spanish.',
+  ],
+  topicPlaceholder: 'Food, travel, music, life in Spain…',
+  lookupUnavailableReply: 'No he podido comprobarlo ahora mismo. Si quieres, podemos hablar del tema en general.',
+  themeOverrides: {
+    coffee: { id: 'coffee', title: 'Un café', subtitle: 'Something warm, please', symbol: 'cup.and.saucer', category: 'Everyday', situation: "Meet in a neighbourhood café in Spain. Order a drink and chat. Ask about the learner's interests.", colorIndex: 0 },
+    groceries: { id: 'groceries', title: 'En el mercado', subtitle: 'A little of everything', symbol: 'basket', category: 'Everyday', situation: 'Visit a local market in a Spanish-speaking community. Practise quantities, prices and polite questions. Respect regional food vocabulary.', colorIndex: 2 },
+    travel: { id: 'travel', title: 'Next stop', subtitle: 'A ticket to somewhere', symbol: 'tram', category: 'Everyday', situation: 'Plan a trip in Spain. Discuss transport and tickets without inventing current schedules.', colorIndex: 1 },
+    cabin: { id: 'cabin', title: 'A weekend away', subtitle: 'Somewhere in the sunshine', symbol: 'mountain.2', category: 'Local life', situation: 'Plan an imagined weekend in a Spanish-speaking place. Choose a city, coast or countryside together and discuss practical plans.', colorIndex: 2 },
+    traditions: { id: 'traditions', title: 'La sobremesa', subtitle: 'Let the conversation linger', symbol: 'fork.knife', category: 'Local life', situation: 'Talk after a shared meal about daily routines, family and local customs. Compare experiences without treating Spanish-speaking cultures as uniform.', colorIndex: 2 },
+  },
+}
+
+const english: LanguageModule = {
+  id: 'en', name: 'English', nativeName: 'English', variety: 'International', locale: 'en',
+  greeting: 'Hi!', greetingWord: 'hi',
+  speechGuidance: 'Use clear, broadly intelligible English with a consistent, natural pronunciation. Accept valid regional accents, vocabulary and grammar, including British and American forms. Do not treat an accent difference as an error or require imitation of a native accent. Correct pronunciation only when meaning is unclear and the audio supports the correction.',
+  writingGuidance: 'Use standard English spelling and punctuation. Keep one spelling convention within your own reply, but accept valid regional spelling and usage from the learner.',
+  lemmaGuidance: 'Give countable nouns in the singular and verbs in the base form, for example a journey and go. Keep meaningful phrasal verbs such as look after together. Use a short, plain English definition as the stable sense rather than repeating the word itself.',
+  teachingFocus: [
+    "Greetings, introductions and useful everyday chunks such as I'd like and my name is.",
+    'Everyday questions, present forms, articles and common countable and uncountable nouns.',
+    'Connected stories, past events, future plans and familiar situations.',
+    'Reasons and opinions, present perfect in context, conditionals and natural linking phrases.',
+    'Nuance, idiomatic expressions, reported speech and appropriate register.',
+    'Flexible advanced discussion with precise language, implication and tact.',
+  ],
+  topicPlaceholder: 'Travel, films, work, everyday life…',
+  lookupUnavailableReply: "I couldn't check that just now. We can talk about the topic more generally, if you like.",
+  themeOverrides: {
+    coffee: { id: 'coffee', title: 'A coffee?', subtitle: 'Something warm, please', symbol: 'cup.and.saucer', category: 'Everyday', situation: "Meet in a neighbourhood café. Order a drink and chat in English. Follow the learner's interests and accept regional vocabulary.", colorIndex: 0 },
+    travel: { id: 'travel', title: 'Next stop', subtitle: 'A ticket to somewhere', symbol: 'tram', category: 'Everyday', situation: 'Plan a trip using English. Let the learner choose the destination. Discuss transport and tickets without inventing current schedules.', colorIndex: 1 },
+    traditions: { id: 'traditions', title: 'Everyday customs', subtitle: 'Small customs, big stories', symbol: 'flag', category: 'Local life', situation: 'Compare everyday customs from places the learner knows. English is used across many cultures; avoid presenting one country’s habits as universal.', colorIndex: 2 },
+  },
+}
+
+const french: LanguageModule = {
+  id: 'fr', name: 'French', nativeName: 'Français', variety: 'France', locale: 'fr-FR',
+  greeting: 'Salut !', greetingWord: 'salut',
+  speechGuidance: 'Use clear, natural metropolitan French pronunciation. Use tu in a friendly conversation and vous when the situation calls for formality or plural address. Accept valid regional accents, vocabulary and grammar from across the French-speaking world. Do not treat regional variation, informal omission of ne or a non-native accent alone as an error. Do not imitate a regional caricature.',
+  writingGuidance: 'Use standard French spelling, accents, apostrophes and punctuation. Preserve accents on capital letters. Match the register to the situation and accept valid regional usage from the learner.',
+  lemmaGuidance: 'Give nouns with a singular article that makes gender clear where possible and verbs in the infinitive, for example une maison, un ami and parler. Keep pronominal verbs such as se souvenir distinct. Preserve accents and meaningful elisions.',
+  teachingFocus: [
+    "Greetings, introductions and useful everyday chunks such as je m'appelle and je voudrais.",
+    'Everyday questions, grammatical gender, present tense and common negation in conversation.',
+    'Connected stories, passé composé and imparfait in context, future plans and familiar situations.',
+    'Reasons and opinions, object pronouns, conditional requests and common subjunctive contexts.',
+    'Nuance, hypothetical situations, register, idiomatic phrasing and regional variation.',
+    'Flexible advanced discussion with precise, natural French and appropriate tone.',
+  ],
+  topicPlaceholder: 'Food, cinema, travel, life in France…',
+  lookupUnavailableReply: "Je n'ai pas pu vérifier ça pour le moment. On peut parler du sujet en général, si tu veux.",
+  themeOverrides: {
+    coffee: { id: 'coffee', title: 'Un café ?', subtitle: 'Something warm, please', symbol: 'cup.and.saucer', category: 'Everyday', situation: "Meet in a neighbourhood café in France. Order a drink and chat. Use polite greetings with staff and a friendly register with the learner.", colorIndex: 0 },
+    groceries: { id: 'groceries', title: 'Au marché', subtitle: 'A little of everything', symbol: 'basket', category: 'Everyday', situation: 'Visit a local market in France. Practise quantities, prices and polite requests, then ask what the learner likes to cook.', colorIndex: 2 },
+    travel: { id: 'travel', title: 'En route', subtitle: 'A ticket to somewhere', symbol: 'tram', category: 'Everyday', situation: 'Plan a trip in France. Discuss transport, directions and tickets without inventing current schedules.', colorIndex: 1 },
+    cabin: { id: 'cabin', title: 'A weekend away', subtitle: 'A change of scene', symbol: 'mountain.2', category: 'Local life', situation: 'Plan an imagined weekend in a French-speaking place. Choose a city, coast or countryside together and discuss practical plans.', colorIndex: 2 },
+    traditions: { id: 'traditions', title: 'À table', subtitle: 'Stay a little longer', symbol: 'fork.knife', category: 'Local life', situation: 'Talk over an imagined meal about daily routines and local customs. Compare the learner’s experiences with life in France without treating French-speaking cultures as uniform.', colorIndex: 2 },
+  },
+}
+
+const german: LanguageModule = {
+  id: 'de', name: 'German', nativeName: 'Deutsch', variety: 'Germany', locale: 'de-DE',
+  greeting: 'Hallo!', greetingWord: 'hallo',
+  speechGuidance: 'Use clear, natural Standard German as spoken in Germany. Use du for friendly conversation and Sie when the situation calls for formality. Accept valid Austrian, Swiss and other regional pronunciation, vocabulary and grammar. Do not treat a regional difference or a non-native accent alone as an error. Correct pronunciation only when supported by the audio, not a transcript alone.',
+  writingGuidance: 'Use standard German spelling, noun capitalization, umlauts and ß. Accept Swiss ss spellings and valid regional wording. Match the register to the situation.',
+  lemmaGuidance: 'Give nouns with their singular article and verbs in the infinitive, for example das Haus, die Straße and sprechen. Preserve umlauts and ß. Keep separable verbs such as aufstehen and reflexive verbs such as sich erinnern together as dictionary entries, while quoting the learner’s actual word order exactly.',
+  teachingFocus: [
+    'Greetings, introductions and useful everyday chunks such as ich heiße and ich möchte.',
+    'Everyday questions, grammatical gender, present tense, verb-second word order and common accusative objects.',
+    'Connected stories, conversational past tenses, dative uses, separable verbs and familiar situations.',
+    'Reasons and opinions, subordinate-clause word order, relative clauses and polite Konjunktiv II requests.',
+    'Nuance, hypothetical situations, passive voice, idiomatic phrasing and regional register.',
+    'Flexible advanced discussion with precise, natural German and appropriate tone.',
+  ],
+  topicPlaceholder: 'Food, travel, music, life in Germany…',
+  lookupUnavailableReply: 'Das konnte ich gerade nicht überprüfen. Wenn du möchtest, können wir allgemein über das Thema sprechen.',
+  themeOverrides: {
+    coffee: { id: 'coffee', title: 'Ein Kaffee?', subtitle: 'Something warm, please', symbol: 'cup.and.saucer', category: 'Everyday', situation: "Meet in a neighbourhood café in Germany. Order a drink and chat. Use polite greetings with staff and follow the learner's interests.", colorIndex: 0 },
+    groceries: { id: 'groceries', title: 'Auf dem Markt', subtitle: 'A little of everything', symbol: 'basket', category: 'Everyday', situation: 'Shop at a weekly market in Germany. Practise quantities, prices and polite requests, accepting regional names for foods.', colorIndex: 2 },
+    travel: { id: 'travel', title: 'Unterwegs', subtitle: 'A ticket to somewhere', symbol: 'tram', category: 'Everyday', situation: 'Plan a trip in Germany. Discuss transport, directions and tickets without inventing current schedules.', colorIndex: 1 },
+    cabin: { id: 'cabin', title: 'A weekend away', subtitle: 'A change of scene', symbol: 'mountain.2', category: 'Local life', situation: 'Plan an imagined weekend in a German-speaking place. Choose a city, coast or countryside together and discuss practical plans.', colorIndex: 2 },
+    traditions: { id: 'traditions', title: 'Feierabend', subtitle: 'After the working day', symbol: 'flag', category: 'Local life', situation: 'Talk about routines after work and local customs in Germany. Compare the learner’s experiences without treating German-speaking cultures as uniform.', colorIndex: 2 },
+  },
+}
+
+const italian: LanguageModule = {
+  id: 'it', name: 'Italian', nativeName: 'Italiano', variety: 'Italy', locale: 'it-IT',
+  greeting: 'Ciao!', greetingWord: 'ciao',
+  speechGuidance: 'Use clear, natural Standard Italian pronunciation. Use tu for friendly conversation and Lei when the situation calls for formality. Model vowel sounds, word stress and consonant length naturally. Accept valid regional accents and vocabulary without treating regional variation or a non-native accent alone as an error. Do not infer a pronunciation error from spelling alone.',
+  writingGuidance: 'Use standard Italian spelling, accents, apostrophes and punctuation. Preserve meaningful contrasts such as e and è. Match the register to the situation and accept valid regional usage.',
+  lemmaGuidance: 'Give nouns with their singular article and verbs in the infinitive, for example la casa, lo studente and parlare. Preserve elisions and accents. Keep reflexive verbs such as chiamarsi and pronominal verbs such as farcela distinct.',
+  teachingFocus: [
+    'Greetings, introductions and useful everyday chunks such as mi chiamo and vorrei.',
+    'Everyday questions, gender and number agreement, present tense and common prepositions.',
+    'Connected stories, passato prossimo and imperfetto in context, future plans and familiar situations.',
+    'Reasons and opinions, object pronouns, conditional requests and common congiuntivo contexts.',
+    'Nuance, hypothetical situations, pronoun combinations, idiomatic phrasing and regional register.',
+    'Flexible advanced discussion with precise, natural Italian and appropriate tone.',
+  ],
+  topicPlaceholder: 'Food, cinema, travel, life in Italy…',
+  lookupUnavailableReply: "Non sono riuscito a verificarlo adesso. Se vuoi, possiamo parlare dell'argomento in generale.",
+  themeOverrides: {
+    coffee: { id: 'coffee', title: 'Un caffè?', subtitle: 'Something warm, please', symbol: 'cup.and.saucer', category: 'Everyday', situation: "Meet at a neighbourhood bar in Italy for a coffee. Order a drink, greet the staff politely and chat about the learner's day.", colorIndex: 0 },
+    groceries: { id: 'groceries', title: 'Al mercato', subtitle: 'A little of everything', symbol: 'basket', category: 'Everyday', situation: 'Visit a local market in Italy. Practise quantities, prices and polite requests, then ask what the learner likes to cook.', colorIndex: 2 },
+    travel: { id: 'travel', title: 'In viaggio', subtitle: 'A ticket to somewhere', symbol: 'tram', category: 'Everyday', situation: 'Plan a trip in Italy. Discuss transport, directions and tickets without inventing current schedules.', colorIndex: 1 },
+    cabin: { id: 'cabin', title: 'A weekend away', subtitle: 'A change of scene', symbol: 'mountain.2', category: 'Local life', situation: 'Plan an imagined weekend in Italy. Choose a city, coast or countryside together and discuss practical plans.', colorIndex: 2 },
+    traditions: { id: 'traditions', title: 'La passeggiata', subtitle: 'An evening walk', symbol: 'figure.walk', category: 'Local life', situation: 'Take an imagined evening walk and discuss daily routines and local customs. Compare experiences without treating Italian communities as uniform.', colorIndex: 2 },
+  },
+}
+
+const portuguese: LanguageModule = {
+  id: 'pt', name: 'Portuguese', nativeName: 'Português', variety: 'Brazil', locale: 'pt-BR',
+  greeting: 'Olá!', greetingWord: 'olá',
+  speechGuidance: 'Use clear, natural Brazilian Portuguese with broadly intelligible pronunciation and consistent Brazilian vocabulary. Use você in friendly conversation and formal address when appropriate. Accept valid uses of tu, regional Brazilian accents and grammar, and European, African and other Portuguese varieties without marking them wrong. Do not imitate a regional caricature or infer pronunciation errors from a transcript alone.',
+  writingGuidance: 'Use standard contemporary Brazilian Portuguese spelling, accents, ã, õ and ç. Prefer everyday Brazilian wording, including a gente and conversational pronoun placement when natural. Accept valid regional and European Portuguese usage from the learner.',
+  lemmaGuidance: 'Give nouns with their singular article and verbs in the infinitive, for example a casa, o pão and falar. Preserve accents, nasal vowels and ç. Keep reflexive and pronominal verbs such as se lembrar distinct. Use a consistent Brazilian dictionary form without treating regional alternatives as errors.',
+  teachingFocus: [
+    'Greetings, introductions and useful everyday chunks such as meu nome é and eu gostaria de.',
+    'Everyday questions, gender and number agreement, present tense, ser and estar, and você and a gente.',
+    'Connected stories, pretérito perfeito and imperfetto in context, future plans and familiar situations.',
+    'Reasons and opinions, object pronouns, polite requests and common subjunctive contexts.',
+    'Nuance, future subjunctive, personal infinitive, hypothetical situations, idiomatic phrasing and regional register.',
+    'Flexible advanced discussion with precise, natural Brazilian Portuguese and appropriate tone.',
+  ],
+  topicPlaceholder: 'Food, music, travel, life in Brazil…',
+  lookupUnavailableReply: 'Não consegui verificar isso agora. Se quiser, podemos conversar sobre o assunto de forma geral.',
+  themeOverrides: {
+    coffee: { id: 'coffee', title: 'Um cafezinho?', subtitle: 'Something warm, please', symbol: 'cup.and.saucer', category: 'Everyday', situation: "Meet at a neighbourhood café or padaria in Brazil. Order a drink and chat about the learner's day, using natural Brazilian vocabulary.", colorIndex: 0 },
+    groceries: { id: 'groceries', title: 'Na feira', subtitle: 'A little of everything', symbol: 'basket', category: 'Everyday', situation: 'Shop at a street market in Brazil. Practise quantities, prices and polite requests, respecting regional food names.', colorIndex: 2 },
+    travel: { id: 'travel', title: 'Pé na estrada', subtitle: 'A ticket to somewhere', symbol: 'tram', category: 'Everyday', situation: 'Plan a trip in Brazil. Discuss transport, directions and tickets without inventing current schedules.', colorIndex: 1 },
+    cabin: { id: 'cabin', title: 'A weekend away', subtitle: 'A change of scene', symbol: 'mountain.2', category: 'Local life', situation: 'Plan an imagined weekend in a Portuguese-speaking place. Choose a city, coast or countryside together and discuss practical plans.', colorIndex: 2 },
+    traditions: { id: 'traditions', title: 'Uma conversa à mesa', subtitle: 'Stay a little longer', symbol: 'fork.knife', category: 'Local life', situation: "Talk over an imagined meal about routines and local customs in Brazil. Compare the learner's experiences without treating Brazilian or Portuguese-speaking cultures as uniform.", colorIndex: 2 },
+  },
+}
+
+const mandarin: LanguageModule = {
+  id: 'zh', name: 'Mandarin Chinese', nativeName: '普通话', variety: 'Mainland China', locale: 'zh-CN',
+  greeting: '你好！', greetingWord: '你好',
+  speechGuidance: 'Use clear, natural Standard Mandarin pronunciation. Treat tones, tone changes, retroflex and non-retroflex sounds, and distinctions between initials and finals as meaningful when they affect understanding. Accept valid regional accents and vocabulary without treating a regional difference or a non-native accent alone as an error. Do not imitate a regional caricature.',
+  writingGuidance: 'Use natural Simplified Chinese and standard modern punctuation. Prefer everyday Mainland usage while accepting valid regional wording and Traditional Chinese input. Keep Chinese text free of unnecessary spaces. The app displays pinyin separately; do not append pinyin or translations to ordinary spoken replies. Explain characters and tones briefly in Mandarin when asked.',
+  lemmaGuidance: 'Give vocabulary lemmas in simplified characters only, with no pinyin or English in the lemma; the app supplies pronunciation help separately. Keep the exact observed form and quote, including Traditional Chinese or learner-written pinyin. Use dictionary forms and preserve meaningful chunks such as 洗澡 and 见面. Do not infer tone accuracy, pronunciation or spoken recall from typed pinyin or a transcript alone.',
+  teachingFocus: [
+    'Greetings, introductions and useful everyday chunks such as 我叫 and 我想要.',
+    'Everyday questions, word order, measure words, numbers and common present-time exchanges.',
+    'Connected stories, completed actions with 了, experiences with 过, and familiar situations.',
+    'Reasons and opinions, comparisons, 把 and 被 constructions, and natural linking phrases.',
+    'Nuance, aspect, conditionals, idiomatic phrasing, register and regional variation.',
+    'Flexible advanced discussion with precise, natural Mandarin and appropriate tone.',
+  ],
+  topicPlaceholder: 'Food, travel, films, everyday life…',
+  lookupUnavailableReply: '我现在没法查证这件事。如果你愿意，我们可以先聊聊这个话题的一般情况。',
+  themeOverrides: {
+    coffee: { id: 'coffee', title: '喝杯咖啡？', subtitle: 'Something warm, please', symbol: 'cup.and.saucer', category: 'Everyday', situation: '在一家社区咖啡馆见面。用普通话点饮料并聊天，跟着学习者的兴趣展开对话。', colorIndex: 0 },
+    groceries: { id: 'groceries', title: '去买菜', subtitle: 'Find something good', symbol: 'basket', category: 'Everyday', situation: '在菜市场或超市买日常食材。练习数量、价格和礼貌的提问，尊重不同地区的食物词汇。', colorIndex: 2 },
+    travel: { id: 'travel', title: '下一站', subtitle: 'A ticket to somewhere', symbol: 'tram', category: 'Everyday', situation: '用普通话计划一次旅行。讨论交通、方向和买票，不要编造当前的时刻表。', colorIndex: 1 },
+    cabin: { id: 'cabin', title: '周末出游', subtitle: 'A change of scene', symbol: 'mountain.2', category: 'Local life', situation: '一起设想一个周末旅行，选择城市、海边或乡村，讨论实际安排和喜欢做的事情。', colorIndex: 2 },
+    traditions: { id: 'traditions', title: '日常习俗', subtitle: 'Small customs, big stories', symbol: 'flag', category: 'Local life', situation: '用普通话聊日常习俗和节日。比较学习者熟悉的地方，避免把任何一种习惯说成所有人的共同体验。', colorIndex: 2 },
+  },
+}
+
+export const DEFAULT_LANGUAGE_ID = 'en'
+export const ALL_LANGUAGES: LanguageModule[] = [norwegian, spanish, english, french, german, italian, portuguese, mandarin]
+export function moduleFor(id: string): LanguageModule | undefined {
+  return ALL_LANGUAGES.find((l) => l.id === id)
+}
+
+export const MEANING_LANGUAGES = [
+  'English', 'French', 'German', 'Spanish', 'Norwegian', 'Portuguese',
+  'Brazilian Portuguese', 'Italian', 'Chinese (Simplified)', 'Polish', 'Arabic',
+  'Ukrainian',
+]
+export function meaningGreeting(language: string): string {
+  return (
+    {
+      English: 'Hi!', French: 'Salut !', German: 'Hallo!', Spanish: '¡Hola!',
+      Norwegian: 'Hei!', Portuguese: 'Olá!', 'Brazilian Portuguese': 'Olá!', Italian: 'Ciao!',
+      'Chinese (Simplified)': '你好！', Chinese: '你好！', Polish: 'Cześć!',
+      Arabic: 'مرحبًا!', Ukrainian: 'Привіт!',
+    } as Record<string, string>
+  )[language] ?? 'Hi!'
+}
